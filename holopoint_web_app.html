@@ -1,0 +1,2458 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <!-- Content Security Policy: Blocks third-party image IP leaks, framing & unauthorized origins -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdn.tailwindcss.com https://unpkg.com https://*.workers.dev https://fonts.googleapis.com https://fonts.gstatic.com 'unsafe-inline' 'unsafe-eval'; img-src 'self' data: blob:; frame-ancestors 'none'; object-src 'none';">
+  <title>Holopoint - Chat</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23111113'/%3E%3Ccircle cx='32' cy='32' r='20' fill='none' stroke='%23F5D042' stroke-width='3'/%3E%3Cline x1='32' y1='6' x2='32' y2='18' stroke='%23F5D042' stroke-width='3' stroke-linecap='round'/%3E%3Cline x1='32' y1='46' x2='32' y2='58' stroke='%23F5D042' stroke-width='3' stroke-linecap='round'/%3E%3Cline x1='6' y1='32' x2='18' y2='32' stroke='%23F5D042' stroke-width='3' stroke-linecap='round'/%3E%3Cline x1='46' y1='32' x2='58' y2='32' stroke='%23F5D042' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M27 42V29c0-5 5-9 5-9s5 4 5 9v13H27zm-1 2h12v3H26v-3z' fill='%23F5D042'/%3E%3C/svg%3E">
+
+  <!-- Clean Humanist UI Font (Public Sans) + Brand Wordmark Font (Space Grotesk) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Public Sans"', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
+            display: ['"Space Grotesk"', '"Public Sans"', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Default Theme ('graphite'): Matte Graphite + Holopoint Yellow */
+    :root {
+      --bg-app: #111113;
+      --bg-sidebar: #161619;
+      --bg-card: #1E1E22;
+      --bg-card-hover: #27272C;
+      --bg-input: #19191D;
+      --border-color: #27272C;
+      --border-strong: #34343B;
+      --text-primary: #F4F4F6;
+      --text-secondary: #CACAD2;
+      --subtext: #8A8A94;
+      --accent: #F5D042;
+      --accent-hover: #E5BE2E;
+      --accent-soft: rgba(245, 208, 66, 0.13);
+      --accent-text: #111113;
+      --danger: #EF4444;
+      --danger-soft: rgba(239, 68, 68, 0.12);
+    }
+
+    /* Alternate Theme ('snap-dark'): Midnight Slate + Holopoint Yellow */
+    body.theme-snap-dark {
+      --bg-app: #0E1117;
+      --bg-sidebar: #131720;
+      --bg-card: #1B212D;
+      --bg-card-hover: #232B3A;
+      --bg-input: #161B25;
+      --border-color: #232A38;
+      --border-strong: #313A4D;
+      --text-primary: #F3F4F6;
+      --text-secondary: #C6CCD8;
+      --subtext: #8690A2;
+      --accent: #F5D042;
+      --accent-hover: #E5BE2E;
+      --accent-soft: rgba(245, 208, 66, 0.13);
+      --accent-text: #0E1117;
+    }
+
+    /* Alternate Theme ('oled'): Pure Black + Holopoint Yellow */
+    body.theme-oled {
+      --bg-app: #000000;
+      --bg-sidebar: #070708;
+      --bg-card: #111113;
+      --bg-card-hover: #19191C;
+      --bg-input: #0C0C0E;
+      --border-color: #1D1D21;
+      --border-strong: #2C2C32;
+      --text-primary: #F9FAFB;
+      --text-secondary: #D1D5DB;
+      --subtext: #7A7A84;
+      --accent: #F5D042;
+      --accent-hover: #E5BE2E;
+      --accent-soft: rgba(245, 208, 66, 0.14);
+      --accent-text: #000000;
+    }
+
+    /* Alternate Theme ('cyberpunk'): Deep Plum Charcoal + Soft Violet */
+    body.theme-cyberpunk {
+      --bg-app: #0D0B12;
+      --bg-sidebar: #13101B;
+      --bg-card: #1C1827;
+      --bg-card-hover: #252034;
+      --bg-input: #161320;
+      --border-color: #262136;
+      --border-strong: #362F4C;
+      --text-primary: #F4F3F8;
+      --text-secondary: #CBC7D8;
+      --subtext: #8B859E;
+      --accent: #A78BFA;
+      --accent-hover: #8B5CF6;
+      --accent-soft: rgba(167, 139, 250, 0.14);
+      --accent-text: #0D0B12;
+    }
+
+    /* Alternate Theme ('classic'): Warm Paper Light Mode + Deep Gold */
+    body.theme-classic {
+      --bg-app: #F8F6F1;
+      --bg-sidebar: #F0EDE5;
+      --bg-card: #E6E2D7;
+      --bg-card-hover: #DDD8CB;
+      --bg-input: #FFFFFF;
+      --border-color: #DDD8CC;
+      --border-strong: #C7C1B2;
+      --text-primary: #161618;
+      --text-secondary: #3A3A40;
+      --subtext: #6E6E77;
+      --accent: #CA8A04;
+      --accent-hover: #A16207;
+      --accent-soft: rgba(202, 138, 4, 0.12);
+      --accent-text: #FFFFFF;
+    }
+
+    * {
+      -webkit-tap-highlight-color: transparent;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: var(--bg-app);
+      color: var(--text-primary);
+      font-family: 'Public Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    input, textarea {
+      user-select: text !important;
+      -webkit-user-select: text !important;
+    }
+
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .hide-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .thin-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .thin-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .thin-scrollbar::-webkit-scrollbar-thumb {
+      background: var(--border-strong);
+      border-radius: 3px;
+    }
+
+    .brand-wordmark {
+      font-family: 'Space Grotesk', 'Public Sans', sans-serif;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+    }
+
+    .story-ring-active {
+      border: 2px solid var(--accent);
+      padding: 2px;
+    }
+
+    .thread-active {
+      background-color: var(--bg-card);
+      box-shadow: inset 2.5px 0 0 0 var(--accent);
+    }
+
+    @keyframes subtleFade {
+      0% { opacity: 0; transform: translateY(3px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    .animate-pop {
+      animation: subtleFade 0.14s ease-out forwards;
+    }
+  </style>
+</head>
+<body class="h-screen w-screen overflow-hidden flex font-sans antialiased">
+
+  <!-- ======================================================== -->
+  <!-- 1. LOGIN / REGISTER VIEW                                 -->
+  <!-- ======================================================== -->
+  <div id="authOverlay" class="fixed inset-0 z-50 flex items-center justify-center p-5 bg-[var(--bg-app)]">
+    <div class="w-full max-w-[360px] border border-[var(--border-color)] bg-[var(--bg-sidebar)] rounded-lg p-6 animate-pop shadow-2xl">
+      <div class="flex flex-col items-center text-center pb-5 mb-5 border-b border-[var(--border-color)]">
+        <div class="w-12 h-12 flex items-center justify-center mb-2.5">
+          <svg class="w-12 h-12" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="32" cy="32" r="21" stroke="var(--accent)" stroke-width="2.75"/>
+            <line x1="32" y1="5" x2="32" y2="17" stroke="var(--accent)" stroke-width="2.75" stroke-linecap="round"/>
+            <line x1="32" y1="47" x2="32" y2="59" stroke="var(--accent)" stroke-width="2.75" stroke-linecap="round"/>
+            <line x1="5" y1="32" x2="17" y2="32" stroke="var(--accent)" stroke-width="2.75" stroke-linecap="round"/>
+            <line x1="47" y1="32" x2="59" y2="32" stroke="var(--accent)" stroke-width="2.75" stroke-linecap="round"/>
+            <path d="M27.5 41.5V29.5C27.5 24.8 30.2 21.5 32 20C33.8 21.5 36.5 24.8 36.5 29.5V41.5H27.5Z" stroke="var(--accent)" stroke-width="2.2" fill="var(--accent)" fill-opacity="0.18"/>
+            <line x1="27.5" y1="30" x2="36.5" y2="30" stroke="var(--accent)" stroke-width="1.8"/>
+            <rect x="26.5" y="43.5" width="11" height="2.5" rx="1" fill="var(--accent)"/>
+          </svg>
+        </div>
+        <h1 class="brand-wordmark text-xl font-bold text-[var(--text-primary)] leading-none">HOLOPOINT</h1>
+        <p id="authHeading" class="text-xs text-[var(--subtext)] mt-1.5 leading-none">Sign in to your account</p>
+      </div>
+
+      <div id="authAlert" class="w-full hidden mb-4 px-3 py-2.5 rounded-md bg-[var(--danger-soft)] border border-[var(--danger)]/35 text-[var(--danger)] text-xs flex items-center gap-2">
+        <i data-lucide="alert-circle" class="w-4 h-4 shrink-0"></i>
+        <span id="authAlertText" class="flex-1 leading-snug">Invalid credentials</span>
+      </div>
+
+      <form onsubmit="handleAuthSubmit(event)" class="w-full space-y-3.5">
+        <div>
+          <label for="authUserInput" class="text-xs font-medium text-[var(--text-secondary)] mb-1.5 block">Username</label>
+          <div class="relative flex items-center">
+            <span class="absolute left-3 text-[var(--subtext)] text-sm font-medium">@</span>
+            <input type="text" id="authUserInput" placeholder="username" autocomplete="username" autocorrect="off" autocapitalize="none" required
+              class="w-full min-h-[44px] pl-7 pr-3 py-2 bg-[var(--bg-input)] border border-[var(--border-color)] rounded-md text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)] transition placeholder:text-[var(--subtext)]/60">
+          </div>
+        </div>
+
+        <div>
+          <label for="authPassInput" class="text-xs font-medium text-[var(--text-secondary)] mb-1.5 block">Password</label>
+          <input type="password" id="authPassInput" placeholder="••••••••" autocomplete="current-password" required
+            class="w-full min-h-[44px] px-3 py-2 bg-[var(--bg-input)] border border-[var(--border-color)] rounded-md text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)] transition placeholder:text-[var(--subtext)]/60">
+        </div>
+
+        <div class="flex items-center justify-between pt-0.5">
+          <label class="flex items-center gap-2 cursor-pointer select-none min-h-[36px]">
+            <input type="checkbox" id="authRememberCheckbox" checked class="w-3.5 h-3.5 rounded bg-[var(--bg-input)] border-[var(--border-strong)] accent-[var(--accent)]">
+            <span class="text-xs text-[var(--subtext)]">Keep session active</span>
+          </label>
+          <div class="flex items-center gap-3">
+            <button type="button" onclick="openResetModal()" class="text-xs text-[var(--subtext)] hover:text-[var(--text-primary)] hover:underline min-h-[36px]">Forgot password?</button>
+            <button type="button" onclick="toggleAuthMode()" id="authSwitchBtn" class="text-xs font-semibold text-[var(--accent)] hover:underline min-h-[36px]">Create account</button>
+          </div>
+        </div>
+
+        <button type="submit" id="authSubmitBtn" class="w-full min-h-[44px] mt-1 py-2.5 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--accent-text)] font-semibold text-sm rounded-md transition flex items-center justify-center gap-2">
+          <span id="authSubmitText">Log in</span>
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Password Recovery Modal (Requires One-Time Recovery Key) -->
+  <div id="resetPasswordModal" class="hidden fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="w-full max-w-[380px] bg-[var(--bg-sidebar)] border border-[var(--border-strong)] rounded-lg animate-pop shadow-2xl">
+      <div class="px-4 py-3 flex items-center justify-between border-b border-[var(--border-color)]">
+        <div class="flex items-center gap-2">
+          <i data-lucide="key-round" class="w-4 h-4 text-[var(--accent)]"></i>
+          <h3 class="font-semibold text-[var(--text-primary)] text-sm">Reset password</h3>
+        </div>
+        <button onclick="closeResetModal()" class="min-w-[36px] min-h-[36px] -mr-1.5 rounded-md hover:bg-[var(--bg-card)] text-[var(--subtext)] hover:text-[var(--text-primary)] flex items-center justify-center">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handlePasswordResetSubmit(event)" class="p-4 space-y-3.5">
+        <p class="text-xs text-[var(--subtext)] leading-relaxed">
+          Enter your username and your one-time <span class="text-[var(--text-primary)] font-medium">Recovery Key</span>. Resetting your password signs out all devices and issues a new recovery key.
+        </p>
+
+        <div id="resetAlert" class="hidden px-3 py-2 rounded-md bg-[var(--danger-soft)] border border-[var(--danger)]/35 text-[var(--danger)] text-xs"></div>
+
+        <div>
+          <label for="resetUserInput" class="text-xs font-medium text-[var(--text-secondary)] mb-1 block">Username</label>
+          <input type="text" id="resetUserInput" placeholder="username" autocapitalize="none" required
+            class="w-full min-h-[40px] px-3 py-1.5 bg-[var(--bg-input)] border border-[var(--border-color)] rounded-md text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)]">
+        </div>
+
+        <div>
+          <label for="resetKeyInput" class="text-xs font-medium text-[var(--text-secondary)] mb-1 block">Recovery key</label>
+          <input type="text" id="resetKeyInput" placeholder="HP-XXXX-XXXX-XXXX-XXXX" autocomplete="off" required
+            class="w-full min-h-[40px] px-3 py-1.5 bg-[var(--bg-input)] border border-[var(--border-color)] rounded-md text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)]">
+        </div>
+
+        <div>
+          <label for="resetNewPassInput" class="text-xs font-medium text-[var(--text-secondary)] mb-1 block">New password (min 6 chars)</label>
+          <input type="password" id="resetNewPassInput" placeholder="••••••••" autocomplete="new-password" required
+            class="w-full min-h-[40px] px-3 py-1.5 bg-[var(--bg-input)] border border-[var(--border-color)] rounded-md text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)]">
+        </div>
+
+        <button type="submit" id="resetSubmitBtn" class="w-full min-h-[42px] py-2 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--accent-text)] font-semibold text-sm rounded-md transition">
+          Reset password &amp; rotate key
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- One-Time Recovery Key Display Modal -->
+  <div id="recoveryKeyRevealModal" class="hidden fixed inset-0 z-[70] bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="w-full max-w-[380px] bg-[var(--bg-sidebar)] border border-[var(--border-strong)] rounded-lg animate-pop shadow-2xl p-5 space-y-4">
+      <div class="flex items-start gap-3">
+        <div class="w-9 h-9 rounded-md bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center shrink-0">
+          <i data-lucide="shield-check" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 class="font-semibold text-[var(--text-primary)] text-sm">Save your recovery key</h3>
+          <p class="text-xs text-[var(--subtext)] mt-1 leading-relaxed">
+            This key is shown <strong class="text-[var(--text-primary)]">only once</strong>. It is the only way to recover your account if you forget your password.
+          </p>
+        </div>
+      </div>
+
+      <div class="p-3 rounded-md bg-[var(--bg-input)] border border-[var(--border-strong)] flex items-center justify-between gap-2">
+        <code id="revealedRecoveryKeyText" class="text-sm font-bold tracking-wider text-[var(--accent)] select-all">HP-XXXX-XXXX-XXXX-XXXX</code>
+        <button type="button" onclick="copyRevealedRecoveryKey()" class="min-h-[34px] px-2.5 rounded-md bg-[var(--bg-card)] hover:bg-[var(--bg-card-hover)] border border-[var(--border-color)] text-xs font-medium text-[var(--text-primary)] shrink-0 transition">
+          Copy
+        </button>
+      </div>
+
+      <button type="button" onclick="closeRecoveryRevealModal()" class="w-full min-h-[42px] py-2 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--accent-text)] font-semibold text-xs rounded-md transition">
+        I have saved my recovery key
+      </button>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- 2. MAIN DUAL-PANE MESSAGING CLIENT                       -->
+  <!-- ======================================================== -->
+  <div id="mainApp" class="flex-1 w-full h-full flex overflow-hidden">
+
+    <!-- LEFT SIDEBAR -->
+    <aside id="sidebarPane" class="w-full md:w-72 lg:w-80 h-full flex flex-col border-r border-[var(--border-color)] bg-[var(--bg-sidebar)] shrink-0 z-20">
+
+      <!-- Top Bar: Brand + Compact Actions -->
+      <div class="h-12 px-3.5 flex items-center justify-between border-b border-[var(--border-color)] shrink-0">
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="32" cy="32" r="21" stroke="var(--accent)" stroke-width="3.2"/>
+            <line x1="32" y1="5" x2="32" y2="17" stroke="var(--accent)" stroke-width="3.2" stroke-linecap="round"/>
+            <line x1="32" y1="47" x2="32" y2="59" stroke="var(--accent)" stroke-width="3.2" stroke-linecap="round"/>
+            <line x1="5" y1="32" x2="17" y2="32" stroke="var(--accent)" stroke-width="3.2" stroke-linecap="round"/>
+            <line x1="47" y1="32" x2="59" y2="32" stroke="var(--accent)" stroke-width="3.2" stroke-linecap="round"/>
+            <path d="M27.5 41.5V29.5C27.5 24.8 30.2 21.5 32 20C33.8 21.5 36.5 24.8 36.5 29.5V41.5H27.5Z" fill="var(--accent)"/>
+            <rect x="26.5" y="43.5" width="11" height="2.8" rx="1" fill="var(--accent)"/>
+          </svg>
+          <span class="brand-wordmark text-[13px] font-bold text-[var(--text-primary)]">HOLOPOINT</span>
+        </div>
+
+        <div class="flex items-center gap-0.5">
+          <button onclick="openFriendsModal()" title="Friends & requests" class="relative min-w-[40px] min-h-[40px] md:min-w-[32px] md:min-h-[32px] rounded-md hover:bg-[var(--bg-card)] text-[var(--subtext)] hover:text-[var(--text-primary)] flex items-center justify-center transition">
+            <i data-lucide="users" class="w-4 h-4"></i>
+            <span id="friendsBadgeCount" class="hidden absolute top-1 right-1 md:top-0.5 md:right-0.5 min-w-[15px] h-[15px] px-1 rounded-full bg-[var(--accent)] text-[var(--accent-text)] text-[10px] font-bold flex items-center justify-center leading-none">0</span>
+          </button>
+          <button onclick="openNewChatModal()" title="New direct message" class="min-w-[40px] min-h-[40px] md:min-w-[32px] md:min-h-[32px] rounded-md hover:bg-[var(--bg-card)] text-[var(--subtext)] hover:text-[var(--text-primary)] flex items-center justify-center transition">
+            <i data-lucide="square-pen" class="w-4 h-4"></i>
+          </button>
+          <button onclick="performLogout()" title="Log out" class="min-w-[40px] min-h-[40px] md:min-w-[32px] md:min-h-[32px] rounded-md hover:bg-[var(--bg-card)] text-[var(--subtext)] hover:text-[var(--danger)] flex items-center justify-center transition">
+            <i data-lucide="log-out" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Current User Strip -->
+      <header class="px-3.5 py-2 flex items-center justify-between border-b border-[var(--border-color)] shrink-0">
+        <button type="button" onclick="openProfileModal()" class="w-full min-h-[44px] md:min-h-[38px] px-1.5 -mx-1.5 rounded-md hover:bg-[var(--bg-card)] flex items-center justify-between transition text-left group">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <div class="w-7 h-7 rounded-md border border-[var(--border-strong)] overflow-hidden bg-[var(--bg-card)] shrink-0">
+              <img id="navAvatarImg" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="w-full h-full object-cover" alt="avatar">
+            </div>
+            <div class="min-w-0">
+              <div class="flex items-center gap-1.5">
+                <span id="navUserLabel" class="text-[13px] font-semibold text-[var(--text-primary)] truncate">@user</span>
+                <span id="navOwnerTag" class="hidden px-1.5 py-0.5 rounded bg-[var(--accent-soft)] border border-[var(--accent)]/40 text-[10px] font-semibold text-[var(--accent)] leading-none">Owner</span>
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" title="Online"></span>
+              </div>
+              <span class="text-[11px] text-[var(--subtext)] block leading-tight">Profile & appearance</span>
+            </div>
+          </div>
+          <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5 text-[var(--subtext)] group-hover:text-[var(--text-primary)] transition shrink-0"></i>
+        </button>
+      </header>
+
+      <!-- 24h Stories Strip -->
+      <section class="py-2.5 px-3.5 border-b border-[var(--border-color)] shrink-0">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-semibold text-[var(--text-secondary)]">Stories</span>
+          <span class="text-[11px] text-[var(--subtext)]">24h · friends</span>
+        </div>
+        <div class="flex items-center gap-2.5 overflow-x-auto hide-scrollbar py-0.5">
+          <!-- Add story button -->
+          <button type="button" onclick="openStoryPostModal()" class="flex flex-col items-center gap-1 shrink-0 min-w-[48px] group">
+            <div class="w-11 h-11 rounded-lg border border-dashed border-[var(--border-strong)] group-hover:border-[var(--accent)] bg-[var(--bg-card)] flex items-center justify-center transition">
+              <i data-lucide="plus" class="w-4 h-4 text-[var(--subtext)] group-hover:text-[var(--accent)]"></i>
+            </div>
+            <span class="text-[11px] text-[var(--subtext)] group-hover:text-[var(--text-primary)]">Add</span>
+          </button>
+          <!-- Dynamic Stories -->
+          <div id="storiesContainer" class="flex items-center gap-2.5"></div>
+        </div>
+      </section>
+
+      <!-- Channels & Direct Messages List -->
+      <div class="flex-1 overflow-y-auto thin-scrollbar">
+        <div class="px-3.5 pt-3 pb-1.5 flex items-center justify-between">
+          <span class="text-xs font-semibold text-[var(--subtext)]">Channels</span>
+        </div>
+
+        <!-- Global Chat Row -->
+        <div onclick="selectConversation('global')" id="threadPillGlobal" class="thread-active px-3.5 py-2.5 min-h-[48px] border-b border-[var(--border-color)] hover:bg-[var(--bg-card-hover)] transition cursor-pointer flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <div class="w-8 h-8 rounded-md bg-[var(--bg-card)] border border-[var(--border-strong)] flex items-center justify-center shrink-0 text-[var(--accent)] text-sm font-bold">
+              #
+            </div>
+            <div class="min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="font-semibold text-[13px] text-[var(--text-primary)] truncate">Global chat</span>
+                <span class="text-[11px] text-[var(--subtext)]">open</span>
+              </div>
+              <div class="text-xs text-[var(--subtext)] truncate mt-0.5" id="globalLastSnippet">Public live feed</div>
+            </div>
+          </div>
+          <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-[var(--subtext)]/60 shrink-0"></i>
+        </div>
+
+        <!-- Direct Messages Header -->
+        <div class="px-3.5 pt-3.5 pb-1.5 flex items-center justify-between border-b border-[var(--border-color)]">
+          <span class="text-xs font-semibold text-[var(--subtext)]">Direct messages</span>
+          <button id="sidebarRequestsPill" onclick="openFriendsModal()" class="hidden px-2 py-0.5 rounded-full bg-[var(--accent)] text-[var(--accent-text)] text-[11px] font-semibold hover:bg-[var(--accent-hover)] transition">
+            0 requests
+          </button>
+        </div>
+
+        <!-- DM Threads Dynamic List -->
+        <div id="dmThreadsTarget" class="divide-y divide-[var(--border-color)]">
+          <!-- Populated from /inbox -->
+        </div>
+      </div>
+    </aside>
+
+    <!-- RIGHT MAIN WORKSPACE: ACTIVE CHAT STREAM -->
+    <main id="chatWorkspace" class="flex-1 h-full flex flex-col bg-[var(--bg-app)] relative overflow-hidden">
+
+      <!-- Pinned System Notice Banner (Controlled from Admin Console) -->
+      <div id="systemNoticeBanner" class="hidden px-4 py-2 bg-[var(--accent-soft)] border-b border-[var(--accent)]/30 flex items-center justify-between gap-2 text-xs text-[var(--text-primary)] shrink-0">
+        <div class="flex items-center gap-2 min-w-0">
+          <i data-lucide="megaphone" class="w-3.5 h-3.5 text-[var(--accent)] shrink-0"></i>
+          <span id="systemNoticeText" class="truncate font-medium"></span>
+        </div>
+        <button type="button" onclick="dismissSystemBanner()" class="text-[var(--subtext)] hover:text-[var(--text-primary)] text-xs shrink-0 px-1">✕</button>
+      </div>
+
+      <!-- Chat Header -->
+      <header class="h-12 px-3 md:px-4 flex items-center justify-between border-b border-[var(--border-color)] bg-[var(--bg-sidebar)] shrink-0 z-20">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <button onclick="closeMobileChat()" class="md:hidden min-w-[44px] min-h-[44px] -ml-2 rounded-md hover:bg-[var(--bg-card)] text-[var(--text-primary)] flex items-center justify-center">
+            <i data-lucide="chevron-left" class="w-5 h-5"></i>
+          </button>
+
+          <div id="chatAvatarWrap" class="w-7 h-7 rounded-md bg-[var(--bg-card)] border border-[var(--border-strong)] flex items-center justify-center overflow-hidden font-bold text-xs text-[var(--accent)] shrink-0">
+            <span id="chatAvatarChar">#</span>
+          </div>
+
+          <div class="min-w-0">
+            <div class="flex items-center gap-2">
+              <h3 id="chatTitle" class="font-semibold text-sm text-[var(--text-primary)] leading-none truncate">Global chat</h3>
+              <span id="chatStreakPill" class="hidden text-xs font-semibold text-[var(--accent)]">🔥 0</span>
+            </div>
+            <span id="chatStatusText" class="text-[11px] text-[var(--subtext)] leading-none mt-1 block truncate">Live stream</span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1">
+          <button onclick="manualRefreshChat()" class="min-w-[40px] min-h-[40px] md:min-w-[32px] md:min-h-[32px] rounded-md hover:bg-[var(--bg-card)] text-[var(--subtext)] hover:text-[var(--text-primary)] flex items-center justify-center transition" title="Refresh">
+            <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- Message History Stream (5-Minute Grouped Hairline Stream) -->
+      <div id="messagesStream" class="flex-1 overflow-y-auto thin-scrollbar select-text">
+        <div class="h-full flex flex-col items-center justify-center text-[var(--subtext)] text-xs gap-1.5 px-6 text-center">
+          <i data-lucide="loader-2" class="w-5 h-5 animate-spin opacity-60"></i>
+          <p class="font-medium text-[var(--text-secondary)]">Loading conversation…</p>
+        </div>
+      </div>
+
+      <!-- Pending Compressed Attachment Strip -->
+      <div id="imageAttachmentStaging" class="hidden px-4 py-2 bg-[var(--bg-sidebar)] border-t border-[var(--border-color)] flex items-center justify-between animate-pop">
+        <div class="flex items-center gap-2.5">
+          <img id="imageStagingPreview" class="w-9 h-9 object-cover rounded-md border border-[var(--border-strong)]" src="" alt="preview">
+          <span class="text-xs font-medium text-[var(--text-secondary)]" id="imageStagingSize">Snap attached</span>
+        </div>
+        <button onclick="clearPendingImage()" class="min-w-[36px] min-h-[36px] rounded-md hover:bg-[var(--bg-card)] text-[var(--subtext)] hover:text-[var(--text-primary)] flex items-center justify-center">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Bottom Chat Composer -->
+      <footer class="p-2.5 md:px-4 md:py-3 bg-[var(--bg-sidebar)] border-t border-[var(--border-color)] shrink-0 z-20">
+        <form onsubmit="handleSendMessage(event)" class="flex items-center gap-2">
+          <input type="file" id="photoFileInput" accept="image/*" class="hidden" onchange="handleImagePicked(event)">
+
+          <button type="button" onclick="document.getElementById('photoFileInput').click()" class="min-w-[44px] min-h-[44px] md:min-w-[38px] md:min-h-[38px] rounded-md bg-[var(--bg-card)] hover:bg-[var(--bg-card-hover)] border border-[var(--border-color)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--accent)] shrink-0 transition" title="Attach photo">
+            <i data-lucide="camera" class="w-4 h-4"></i>
+          </button>
+
+          <div class="flex-1 relative flex items-center">
+            <input type="text" id="chatInputText" placeholder="Write a message…" autocomplete="off" oninput="handleComposerTyping()"
+              class="w-full min-h-[44px] md:min-h-[38px] bg-[var(--bg-input)] border border-[var(--border-color)] text-[var(--text-primary)] text-sm rounded-md pl-3.5 pr-10 py-2 focus:outline-none focus:border-[var(--accent)] transition placeholder:text-[var(--subtext)]">
+            <button type="button" onclick="insertEmoji('🔥')" class="absolute right-1 min-w-[36px] min-h-[36px] flex items-center justify-center text-sm opacity-75 hover:opacity-100 transition" title="Insert flame">
+              <span>🔥</span>
+            </button>
+          </div>
+
+          <button type="submit" id="btnSendChat" class="min-w-[44px] min-h-[44px] md:min-w-[38px] md:min-h-[38px] px-3 rounded-md bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--accent-text)] flex items-center justify-center transition shrink-0" title="Send">
+            <i data-lucide="arrow-up" class="w-4 h-4 stroke-[2.25]"></i>
+          </button>
+        </form>
+      </footer>
+    </main>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- 3. MODALS (FRIENDS, PROFILE, STORY, VIEWER, NEW CHAT)    -->
+  <!-- ======================================================== -->
+
+  <!-- Friends & Requests Modal -->
+  <div id="friendsModal" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="w-full max-w-md max-h-[85vh] flex flex-col bg-[var(--bg-sidebar)] border border-[var(--border-strong)] rounded-lg animate-pop shadow-2xl">
+      <div class="px-4 py-3 flex items-center justify-between border-b border-[var(--border-color)] shrink-0">
+        <div class="flex items-center gap-2">
+          <h3 class="font-semibold text-[var(--text-primary)] text-sm">Friends</h3>
+          <span id="friendsModalBadge" class="hidden px-2 py-0.5 rounded-full bg-[var(--accent)] text-[var(--accent-text)] text-[11px] font-bold">0</span>
+        </div>
+        <button onclick="closeFriendsModal()" class="min-w-[36px] min-h-[36px] -mr-1.5 rounded-md hover:bg-[var(--bg-card)] text-[var(--subtext)] hover:text-[var(--text-primary)] flex items-center justify-center">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Directory Search -->
+      <div class="p-4 pb-3 border-b border-[var(--border-color)] shrink-0">
+        <label for="directorySearchInput" class="text-xs font-medium text-[var(--text-secondary)] block mb-1.5">Find users</label>
+        <div class="relative">
+          <i data-lucide="search" class="w-3.5 h-3.5 text-[var(--subtext)] absolute left-3 top-1/2 -translate-y-1/2"></i>
+          <input type="text" id="directorySearchInput" oninput="searchDirectoryUsers(this.value)" placeholder="Search by username (min 2 chars)…" autocomplete="off" autocapitalize="none"
+            class="w-full min-h-[40px] bg-[var(--bg-input)] border border-[var(--border-color)] pl-8 pr-3 py-1.5 rounded-md text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)] placeholder:text-[var(--subtext)]">
+        </div>
+        <div id="directoryResultsList" class="mt-2 divide-y divide-[var(--border-color)] max-h-40 overflow-y-auto thin-scrollbar">
+          <p class="text-xs text-[var(--subtext)] py-2">Type at least 2 characters to search users.</p>
+        </div>
+      </div>
+
+      <!-- Requests & Roster -->
+      <div class="flex-1 overflow-y-auto thin-scrollbar p-4 space-y-4">
+        <div id="incomingRequestsSection" class="hidden space-y-1.5">
+          <div class="text-xs font-semibold text-[var(--accent)]">Incoming requests</div>
+          <div id="incomingRequestsList" class="divide-y divide-[var(--border-color)] border border-[var(--border-color)] rounded-md overflow-hidden"></div>
+        </div>
+
+        <div id="outgoingRequestsSection" class="hidden space-y-1.5">
+          <div class="text-xs font-semibold text-[var(--subtext)]">Sent requests</div>
+          <div id="outgoingRequestsList" class="divide-y divide-[var(--border-color)] border border-[var(--border-color)] rounded-md overflow-hidden"></div>
+        </div>
+
+        <div class="space-y-1.5">
+          <div class="text-xs font-semibold text-[var(--subtext)]">Your friends</div>
+          <div id="friendsRosterList" class="divide-y divide-[var(--border-color)] border border-[var(--border-color)] rounded-md overflow-hidden">
+            <p class="text-xs text-[var(--subtext)] p-3">No friends added yet.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile & Theme Studio Modal -->
+  <div id="profileModal" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="w-full max-w-sm bg-[var(--bg-sidebar)] border border-[var(--border-strong)] rounded-lg animate-pop shadow-2xl">
+      <div class="px-4 py-3 flex items-center justify-between border-b border-[var(--border-color)]">
+        <h3 class="font-semibold text-[var(--text-primary)] text-sm">Profile & appearance</h3>
+        <button onclick="closeProfileModal()" class="min-w-[36px] min-h-[36px] -mr-1.5 rounded-md hover:bg-[var(--bg-card)] text-[var(--subtext)] hover:text-[var(--text-primary)] flex items-center justify-center">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="p-4 space-y-4">
+        <!-- Live PFP Preview -->
+        <div class="flex items-center gap-3.5 pb-3.5 border-b border-[var(--border-color)]">
+          <div class="w-14 h-14 rounded-lg border border-[var(--border-strong)] overflow-hidden bg-[var(--bg-card)] shrink-0">
+            <img id="pfpPreviewTarget" src="" class="w-full h-full object-cover" alt="avatar">
+          </div>
+          <div class="space-y-1.5">
+            <div class="text-xs font-semibold text-[var(--text-primary)]">Personal emblem</div>
+            <button onclick="rollRandomAvatarSeed()" class="min-h-[34px] px-3 py-1 bg-[var(--bg-card)] hover:bg-[var(--bg-card-hover)] border border-[var(--border-color)] text-xs rounded-md font-medium inline-flex items-center gap-1.5 text-[var(--text-secondary)]">
+              <i data-lucide="dices" class="w-3.5 h-3.5 text-[var(--accent)]"></i>
+              Roll new pattern
+            </button>
+          </div>
+        </div>
+
+        <!-- Avatar Style Picker (All Non-Robot) -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-medium text-[var(--subtext)] block">Avatar style</label>
+          <div class="grid grid-cols-4 gap-1.5">
+            <button type="button" onclick="setPfpStyle('pixel-art')" class="min-h-[36px] text-xs rounded-md bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-[var(--accent)] text-[var(--text-primary)] font-medium">Mosaic</button>
+            <button type="button" onclick="setPfpStyle('bottts')" class="min-h-[36px] text-xs rounded-md bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-[var(--accent)] text-[var(--text-primary)] font-medium">Orbit</button>
+            <button type="button" onclick="setPfpStyle('identicon')" class="min-h-[36px] text-xs rounded-md bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-[var(--accent)] text-[var(--text-primary)] font-medium">Prism</button>
+            <button type="button" onclick="setPfpStyle('avataaars')" class="min-h-[36px] text-xs rounded-md bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-[var(--accent)] text-[var(--text-primary)] font-medium">Portrait</button>
+          </div>
+        </div>
+
+        <!-- Theme Selector -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-medium text-[var(--subtext)] block">Surface theme</label>
+          <div class="grid grid-cols-2 gap-1.5">
+            <button type="button" onclick="setAppTheme('graphite')" class="p-2.5 rounded-md bg-[#111113] border border-[#34343B] hover:border-[#F5D042] text-left col-span-2">
+              <span class="text-xs font-semibold text-[#F4F4F6] block">Graphite & Yellow (Default)</span>
+              <span class="text-[11px] text-[#F5D042]">Matte Graphite & Holopoint Yellow</span>
+            </button>
+            <button type="button" onclick="setAppTheme('snap-dark')" class="p-2.5 rounded-md bg-[#0E1117] border border-[#313A4D] hover:border-[#F5D042] text-left">
+              <span class="text-xs font-semibold text-[#F3F4F6] block">Midnight Slate</span>
+              <span class="text-[11px] text-[#F5D042]">Slate & Yellow</span>
+            </button>
+            <button type="button" onclick="setAppTheme('oled')" class="p-2.5 rounded-md bg-[#000000] border border-[#2C2C32] hover:border-[#F5D042] text-left">
+              <span class="text-xs font-semibold text-[#F9FAFB] block">Pure Black</span>
+              <span class="text-[11px] text-[#8A8A94]">OLED Dark</span>
+            </button>
+            <button type="button" onclick="setAppTheme('cyberpunk')" class="p-2.5 rounded-md bg-[#0D0B12] border border-[#362F4C] hover:border-[#A78BFA] text-left">
+              <span class="text-xs font-semibold text-[#F4F3F8] block">Dusk Violet</span>
+              <span class="text-[11px] text-[#A78BFA]">Plum & Lavender</span>
+            </button>
+            <button type="button" onclick="setAppTheme('classic')" class="p-2.5 rounded-md bg-[#F8F6F1] border border-[#C7C1B2] hover:border-[#CA8A04] text-left">
+              <span class="text-xs font-semibold text-[#161618] block">Warm Paper</span>
+              <span class="text-[11px] text-[#CA8A04]">Light mode</span>
+            </button>
+          </div>
+        </div>
+
+        <button onclick="saveProfileAndTheme()" class="w-full min-h-[42px] py-2 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--accent-text)] font-semibold text-xs rounded-md transition">
+          Save changes
+        </button>
+
+        <div class="pt-3 border-t border-[var(--border-color)] flex items-center justify-between gap-2">
+          <div>
+            <div class="text-xs font-medium text-[var(--text-primary)]">Account recovery key</div>
+            <div class="text-[11px] text-[var(--subtext)]">Generate a new one-time backup key</div>
+          </div>
+          <button type="button" onclick="rotateAccountRecoveryKey()" class="min-h-[34px] px-3 rounded-md bg-[var(--bg-card)] hover:bg-[var(--bg-card-hover)] border border-[var(--border-color)] text-xs font-medium text-[var(--text-primary)] shrink-0 transition">
+            Generate key
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Post to 24h Story Modal -->
+  <div id="storyPostModal" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="w-full max-w-sm bg-[var(--bg-sidebar)] border border-[var(--border-strong)] rounded-lg animate-pop shadow-2xl">
+      <div class="px-4 py-3 flex items-center justify-between border-b border-[var(--border-color)]">
+        <h3 class="font-semibold text-[var(--text-primary)] text-sm">Post 24h story</h3>
+        <button onclick="closeStoryPostModal()" class="min-w-[36px] min-h-[36px] -mr-1.5 rounded-md hover:bg-[var(--bg-card)] text-[var(--subtext)] hover:text-[var(--text-primary)] flex items-center justify-center">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="p-4 space-y-3.5">
+        <input type="file" id="storyFileInput" accept="image/*" class="hidden" onchange="handleStoryImagePicked(event)">
+
+        <div onclick="document.getElementById('storyFileInput').click()" class="w-full aspect-[4/3] rounded-md bg-[var(--bg-card)] border border-dashed border-[var(--border-strong)] hover:border-[var(--accent)] cursor-pointer flex flex-col items-center justify-center overflow-hidden transition">
+          <img id="storyImagePreview" class="hidden w-full h-full object-cover" alt="story preview">
+          <div id="storyUploadPlaceholder" class="flex flex-col items-center gap-1.5 text-[var(--subtext)]">
+            <i data-lucide="image-plus" class="w-6 h-6"></i>
+            <span class="text-xs font-medium">Select an image</span>
+          </div>
+        </div>
+
+        <input type="text" id="storyCaptionInput" placeholder="Add a caption (optional)…" class="w-full min-h-[42px] px-3 py-2 bg-[var(--bg-input)] border border-[var(--border-color)] rounded-md text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)] placeholder:text-[var(--subtext)]">
+
+        <button onclick="submitStoryPost()" class="w-full min-h-[44px] py-2.5 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--accent-text)] font-semibold text-sm rounded-md transition">
+          Publish story
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fullscreen Story Viewer -->
+  <div id="storyViewerModal" class="hidden fixed inset-0 z-50 bg-[#08080A] flex flex-col justify-between p-4" onclick="handleStoryViewerClick(event)">
+    <div class="w-full max-w-md mx-auto pt-1 flex items-center gap-1 z-20">
+      <div class="flex-1 h-[2px] bg-white/25 overflow-hidden rounded-full">
+        <div id="storyProgressFill" class="h-full bg-[var(--accent)] w-0 transition-all duration-100 ease-linear"></div>
+      </div>
+    </div>
+
+    <div class="w-full max-w-md mx-auto flex items-center justify-between z-20 mt-3">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-md border border-white/25 overflow-hidden bg-zinc-900">
+          <img id="storyViewerAvatar" src="" class="w-full h-full object-cover" alt="story avatar">
+        </div>
+        <div class="flex items-baseline gap-2">
+          <span id="storyViewerAuthor" class="text-xs font-semibold text-white">@user</span>
+          <span id="storyViewerTime" class="text-[11px] text-white/60">1h</span>
+        </div>
+      </div>
+      <button onclick="closeStoryViewer()" class="min-w-[40px] min-h-[40px] rounded-md bg-white/10 hover:bg-white/20 text-white flex items-center justify-center">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+    </div>
+
+    <div class="flex-1 max-w-md mx-auto flex items-center justify-center w-full relative z-10 py-4">
+      <img id="storyViewerImg" class="max-h-[75vh] w-auto max-w-full object-contain rounded-md border border-white/10" src="" alt="story">
+      <div id="storyViewerCaptionWrap" class="absolute bottom-6 left-4 right-4 bg-black/75 backdrop-blur-sm px-3.5 py-2 rounded-md border border-white/15 text-center">
+        <p id="storyViewerCaption" class="text-xs font-medium text-white"></p>
+      </div>
+    </div>
+
+    <div class="text-center text-[11px] text-white/45 pb-2 z-20">Tap left to rewind · right to advance</div>
+  </div>
+
+  <!-- New Direct Chat Modal -->
+  <div id="newChatModal" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="w-full max-w-sm bg-[var(--bg-sidebar)] border border-[var(--border-strong)] rounded-lg animate-pop shadow-2xl">
+      <div class="px-4 py-3 flex items-center justify-between border-b border-[var(--border-color)]">
+        <h3 class="font-semibold text-[var(--text-primary)] text-sm">New direct message</h3>
+        <button onclick="closeNewChatModal()" class="min-w-[36px] min-h-[36px] -mr-1.5 rounded-md hover:bg-[var(--bg-card)] text-[var(--subtext)] hover:text-[var(--text-primary)] flex items-center justify-center">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="p-4 space-y-3.5">
+        <div>
+          <label for="newChatUserInput" class="text-xs font-medium text-[var(--text-secondary)] block mb-1.5">Friend username</label>
+          <div class="relative flex items-center">
+            <span class="absolute left-3 text-[var(--subtext)] text-sm">@</span>
+            <input type="text" id="newChatUserInput" placeholder="recipient" autocomplete="off" autocapitalize="none"
+              class="w-full min-h-[42px] bg-[var(--bg-input)] border border-[var(--border-color)] pl-7 pr-3 py-2 rounded-md text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)]">
+          </div>
+        </div>
+
+        <button type="button" onclick="startChatFromModal()" class="w-full min-h-[44px] py-2.5 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--accent-text)] font-semibold text-sm rounded-md transition">
+          Open conversation
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Media Lightbox Viewer (Supports Ephemeral 5s Snaps) -->
+  <div id="mediaViewerModal" class="hidden fixed inset-0 z-50 bg-[#08080A]/95 flex flex-col justify-between p-4 animate-pop" onclick="closeMediaViewer()">
+    <div class="flex items-center justify-between">
+      <span id="viewerAuthorLabel" class="text-xs font-semibold text-zinc-200">@user</span>
+      <button class="min-w-[40px] min-h-[40px] rounded-md bg-white/10 hover:bg-white/20 text-white flex items-center justify-center">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+    </div>
+    <div class="flex-1 flex items-center justify-center p-2">
+      <img id="viewerImgTarget" class="max-w-full max-h-[82vh] object-contain rounded-md border border-white/10" src="" alt="media">
+    </div>
+    <div class="text-center text-[11px] text-zinc-400 pb-2">Tap anywhere to close</div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="appToast" class="hidden fixed bottom-5 right-5 z-50 max-w-sm bg-[var(--bg-sidebar)] border border-[var(--border-strong)] text-[var(--text-primary)] px-3.5 py-2.5 rounded-md shadow-xl animate-pop flex items-center gap-2.5">
+    <div id="toastIconWrap" class="w-6 h-6 rounded bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center shrink-0">
+      <i data-lucide="bell" class="w-3.5 h-3.5"></i>
+    </div>
+    <div class="truncate flex-1">
+      <div id="toastMessage" class="text-xs font-medium truncate">Notification</div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- 4. JAVASCRIPT APP LOGIC (100% PRESERVED INTEGRATION)     -->
+  <!-- ======================================================== -->
+  <script>
+    const BASE_URL = 'https://bznroom983j89gh72heijf9010.bzn6524.workers.dev';
+
+    let currentUser = '';
+    let currentPass = '';
+    let authToken = '';
+    let currentAvatar = 'pixel-art:user';
+    let currentTheme = 'graphite';
+    let isRegisterMode = false;
+
+    // Chat navigation state
+    let activeChatType = 'global'; // 'global' or 'dm'
+    let activeRecipient = null;
+    let pendingCompressedImage = null;
+    let pendingStoryImage = null;
+    let lastMessagesCache = [];
+
+    // Notifications & Friends state
+    let totalUnreadDms = 0;
+    let pendingFriendRequestsCount = 0;
+    let friendsData = { incoming: [], outgoing: [], friends: [] };
+    let removeConfirmTarget = null;
+    let removeConfirmTimer = null;
+
+    // Presence & Typing state
+    let isTypingNow = false;
+    let typingStopTimer = null;
+
+    // Stories state
+    let activeStories = {};
+    let storyPlaybackList = [];
+    let storyPlaybackIndex = 0;
+    let storyTimer = null;
+
+    // Shared user avatar cache (username -> 'style:seed')
+    const userAvatarCache = new Map();
+
+    // Profile maker state
+    let tempAvatarStyle = 'pixel-art';
+    let tempAvatarSeed = 'holopoint';
+
+    // Ephemeral snap viewer timer
+    let ephemeralSnapTimer = null;
+
+    // Warm, restrained participant palette for Global Chat sender names
+    const GROUP_PALETTES = {
+      graphite: ['#F5D042', '#E4E4E7', '#FDE047', '#A1A1AA', '#6EE7B7', '#D4D4D8'],
+      'snap-dark': ['#F5D042', '#E2E8F0', '#FDE047', '#94A3B8', '#6EE7B7', '#CBD5E1'],
+      oled: ['#F5D042', '#F4F4F5', '#FDE047', '#A1A1AA', '#6EE7B7', '#E4E4E7'],
+      cyberpunk: ['#C4B5FD', '#F4F3F8', '#F9A8D4', '#A5B4FC', '#6EE7B7', '#D8B4FE'],
+      classic: ['#A16207', '#1F2937', '#0F766E', '#4B5563', '#9A3412', '#374151']
+    };
+
+    function getGroupAuthorColor(author) {
+      const palette = GROUP_PALETTES[currentTheme] || GROUP_PALETTES.graphite;
+      return palette[hashSeedInt(String(author || '').toLowerCase()) % palette.length];
+    }
+
+    function updateTabTitle() {
+      const total = totalUnreadDms + pendingFriendRequestsCount;
+      document.title = total > 0 ? `(${total}) Holopoint - New Notification` : 'Holopoint - Chat';
+    }
+
+    // --------------------------------------------------------
+    // MULTI-TAB LEADER SYNC & SMART VISIBILITY POLLING ENGINE
+    // --------------------------------------------------------
+    const PollEngine = {
+      timer: null,
+      baseInterval: 3500,
+      currentInterval: 3500,
+      maxInterval: 30000,
+      isLeader: true,
+      channel: null,
+
+      init() {
+        if ("BroadcastChannel" in window && !this.channel) {
+          try {
+            this.channel = new BroadcastChannel("holopoint_sync_bus");
+            this.channel.onmessage = (e) => {
+              const { type, payload } = e.data || {};
+              if (type === "LEADER_PROBE") {
+                if (this.isLeader) this.channel.postMessage({ type: "LEADER_ANNOUNCE" });
+              } else if (type === "LEADER_ANNOUNCE") {
+                this.isLeader = false;
+              } else if (type === "SYNC_GLOBAL" && !this.isLeader) {
+                if (activeChatType === 'global') renderMessages(payload || [], false);
+              } else if (type === "SYNC_INBOX" && !this.isLeader) {
+                renderInbox(payload || []);
+              }
+            };
+            this.channel.postMessage({ type: "LEADER_PROBE" });
+          } catch (err) {}
+        }
+
+        document.addEventListener('visibilitychange', () => {
+          if (document.hidden && ephemeralSnapTimer) {
+            closeMediaViewer();
+          }
+          if (!document.hidden && authToken) {
+            this.currentInterval = this.baseInterval;
+            this.tick();
+          }
+        });
+      },
+
+      start() {
+        this.stop();
+        this.init();
+        this.tick();
+        this.scheduleNext();
+      },
+
+      stop() {
+        if (this.timer) {
+          clearTimeout(this.timer);
+          this.timer = null;
+        }
+      },
+
+      scheduleNext() {
+        if (this.timer) clearTimeout(this.timer);
+        this.timer = setTimeout(async () => {
+          await this.tick();
+          this.scheduleNext();
+        }, this.currentInterval);
+      },
+
+      async tick() {
+        if (!authToken || document.hidden || !this.isLeader) return;
+        try {
+          await syncData();
+          this.currentInterval = this.baseInterval;
+        } catch (err) {
+          if (err && err.status === 429) {
+            this.currentInterval = Math.min(this.currentInterval * 1.6, this.maxInterval);
+          }
+        }
+      }
+    };
+
+    function getAuthHeaders() {
+      const token = authToken || btoa(`${currentUser}:${currentPass}`);
+      return {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      };
+    }
+
+    // --------------------------------------------------------
+    // APP INITIALIZATION
+    // --------------------------------------------------------
+    window.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+
+      const savedTheme = localStorage.getItem('snap_theme') || 'graphite';
+      applyTheme(savedTheme);
+
+      const savedUser = localStorage.getItem('snap_user');
+      const savedToken = localStorage.getItem('snap_token');
+      const savedAvatar = localStorage.getItem('snap_avatar');
+
+      if (savedAvatar) {
+        currentAvatar = savedAvatar;
+        updateCurrentUserAvatar(currentAvatar);
+      }
+
+      if (savedUser && savedToken) {
+        currentUser = savedUser.toLowerCase();
+        authToken = savedToken;
+        document.getElementById('authUserInput').value = currentUser;
+        enterSession();
+      }
+    });
+
+    function applyTheme(theme) {
+      currentTheme = theme || 'graphite';
+      document.body.className = 'h-screen w-screen overflow-hidden flex font-sans antialiased';
+      if (currentTheme === 'snap-dark') document.body.classList.add('theme-snap-dark');
+      else if (currentTheme === 'oled') document.body.classList.add('theme-oled');
+      else if (currentTheme === 'cyberpunk') document.body.classList.add('theme-cyberpunk');
+      else if (currentTheme === 'classic') document.body.classList.add('theme-classic');
+      localStorage.setItem('snap_theme', currentTheme);
+      if (lastMessagesCache.length > 0) {
+        renderMessages(lastMessagesCache, false);
+      }
+    }
+
+    function toggleAuthMode() {
+      isRegisterMode = !isRegisterMode;
+      hideAuthAlert();
+      const heading = document.getElementById('authHeading');
+      const submitText = document.getElementById('authSubmitText');
+      const switchBtn = document.getElementById('authSwitchBtn');
+
+      if (isRegisterMode) {
+        heading.textContent = 'Create a new account';
+        submitText.textContent = 'Create account';
+        switchBtn.textContent = 'Sign in instead';
+      } else {
+        heading.textContent = 'Sign in to your account';
+        submitText.textContent = 'Log in';
+        switchBtn.textContent = 'Create account';
+      }
+    }
+
+    function showAuthAlert(msg) {
+      const el = document.getElementById('authAlert');
+      document.getElementById('authAlertText').textContent = msg;
+      el.classList.remove('hidden');
+    }
+
+    function hideAuthAlert() {
+      document.getElementById('authAlert').classList.add('hidden');
+    }
+
+    async function handleAuthSubmit(e) {
+      if (e) e.preventDefault();
+      const user = document.getElementById('authUserInput').value.trim().toLowerCase();
+      const pass = document.getElementById('authPassInput').value.trim();
+      const remember = document.getElementById('authRememberCheckbox').checked;
+
+      hideAuthAlert();
+
+      if (!user || !pass) {
+        showAuthAlert('Username and password are required');
+        return;
+      }
+
+      const endpoint = isRegisterMode ? '/register' : '/login';
+
+      try {
+        const res = await fetch(`${BASE_URL}${endpoint}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user, pass })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Authentication failed');
+
+        if (isRegisterMode) {
+          toggleAuthMode();
+          if (data.recovery_key) {
+            showRecoveryKeyModal(data.recovery_key);
+          } else {
+            showToast(`@${user} created. Signing in…`);
+            handleAuthSubmit();
+          }
+          return;
+        }
+
+        currentUser = (data.user || user).toLowerCase();
+        currentPass = pass;
+        authToken = data.token || btoa(`${currentUser}:${pass}`);
+
+        if (data.avatar) {
+          currentAvatar = data.avatar;
+          updateCurrentUserAvatar(currentAvatar);
+        }
+        if (data.theme) applyTheme(data.theme);
+
+        if (remember) {
+          localStorage.setItem('snap_user', currentUser);
+          localStorage.setItem('snap_token', authToken);
+          localStorage.setItem('snap_avatar', currentAvatar);
+        }
+
+        enterSession();
+      } catch (err) {
+        showAuthAlert(err.message || 'Network error');
+      }
+    }
+
+    function openResetModal() {
+      const prefillUser = document.getElementById('authUserInput').value.trim().toLowerCase();
+      if (prefillUser) document.getElementById('resetUserInput').value = prefillUser;
+      document.getElementById('resetAlert').classList.add('hidden');
+      document.getElementById('resetKeyInput').value = '';
+      document.getElementById('resetNewPassInput').value = '';
+      document.getElementById('resetPasswordModal').classList.remove('hidden');
+    }
+
+    function closeResetModal() {
+      document.getElementById('resetPasswordModal').classList.add('hidden');
+    }
+
+    async function handlePasswordResetSubmit(e) {
+      if (e) e.preventDefault();
+      const user = document.getElementById('resetUserInput').value.trim().toLowerCase();
+      const recovery_key = document.getElementById('resetKeyInput').value.trim();
+      const new_pass = document.getElementById('resetNewPassInput').value.trim();
+      const alertBox = document.getElementById('resetAlert');
+      const btn = document.getElementById('resetSubmitBtn');
+
+      alertBox.classList.add('hidden');
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(`${BASE_URL}/reset-password`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user, recovery_key, new_pass })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Reset failed');
+
+        closeResetModal();
+        document.getElementById('authUserInput').value = user;
+        document.getElementById('authPassInput').value = new_pass;
+        if (data.recovery_key) {
+          showRecoveryKeyModal(data.recovery_key);
+        } else {
+          showToast('Password reset! You can now log in.');
+        }
+      } catch (err) {
+        alertBox.textContent = err.message || 'Could not reset password';
+        alertBox.classList.remove('hidden');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    async function rotateAccountRecoveryKey() {
+      try {
+        const res = await fetch(`${BASE_URL}/recovery-key/rotate`, {
+          method: 'POST',
+          headers: getAuthHeaders()
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Could not generate recovery key');
+        closeProfileModal();
+        showRecoveryKeyModal(data.recovery_key);
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    function showRecoveryKeyModal(keyStr) {
+      document.getElementById('revealedRecoveryKeyText').textContent = keyStr;
+      document.getElementById('recoveryKeyRevealModal').classList.remove('hidden');
+    }
+
+    function closeRecoveryRevealModal() {
+      document.getElementById('recoveryKeyRevealModal').classList.add('hidden');
+    }
+
+    async function copyRevealedRecoveryKey() {
+      const key = document.getElementById('revealedRecoveryKeyText').textContent;
+      try {
+        await navigator.clipboard.writeText(key);
+        showToast('Recovery key copied to clipboard');
+      } catch {
+        showToast('Select and copy the key manually', 'error');
+      }
+    }
+
+    let idleLogoutTimer = null;
+    const IDLE_TIMEOUT_MS = 15 * 60 * 1000;
+
+    function resetIdleTimer() {
+      if (idleLogoutTimer) clearTimeout(idleLogoutTimer);
+      if (!authToken) return;
+      idleLogoutTimer = setTimeout(() => {
+        showToast('Session locked after 15m inactivity', 'error');
+        performLogout();
+      }, IDLE_TIMEOUT_MS);
+    }
+
+    ['pointerdown', 'keydown', 'touchstart', 'scroll'].forEach(evt => {
+      window.addEventListener(evt, resetIdleTimer, { passive: true });
+    });
+
+    function enterSession() {
+      document.getElementById('authOverlay').classList.add('hidden');
+      document.getElementById('navUserLabel').textContent = `@${currentUser}`;
+      const navOwnerTag = document.getElementById('navOwnerTag');
+      if (navOwnerTag) {
+        if (currentUser === 'bzn') navOwnerTag.classList.remove('hidden');
+        else navOwnerTag.classList.add('hidden');
+      }
+      updateCurrentUserAvatar(currentAvatar);
+
+      resetIdleTimer();
+      selectConversation('global');
+      PollEngine.start();
+    }
+
+    async function performLogout() {
+      if (idleLogoutTimer) clearTimeout(idleLogoutTimer);
+      const tokenToRevoke = authToken;
+      PollEngine.stop();
+      localStorage.removeItem('snap_token');
+      localStorage.removeItem('snap_pass');
+      currentUser = '';
+      currentPass = '';
+      authToken = '';
+      totalUnreadDms = 0;
+      pendingFriendRequestsCount = 0;
+      updateTabTitle();
+      document.getElementById('authOverlay').classList.remove('hidden');
+
+      if (tokenToRevoke) {
+        try {
+          await fetch(`${BASE_URL}/logout`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${tokenToRevoke}` }
+          });
+        } catch (e) {}
+      }
+    }
+
+    // --------------------------------------------------------
+    // POLISHED, NON-ROBOT DETERMINISTIC SVG AVATARS
+    // --------------------------------------------------------
+    function hashSeedInt(str) {
+      let h = 2166136261 >>> 0;
+      for (let i = 0; i < str.length; i++) {
+        h ^= str.charCodeAt(i);
+        h = Math.imul(h, 16777619);
+      }
+      return h >>> 0;
+    }
+
+    function getDiceBearUrl(avatarStr) {
+      const clean = avatarStr || 'pixel-art:user';
+      const [style, rawSeed] = clean.includes(':') ? clean.split(':') : ['pixel-art', clean];
+      const seed = (rawSeed || 'u').trim();
+      const h = hashSeedInt(`${style}:${seed}`);
+      const palettes = [
+        ['#18181B', '#F5D042', '#FEF08A'],
+        ['#18181C', '#E4E4E7', '#F5D042'],
+        ['#1C1917', '#FBBF24', '#FDE68A'],
+        ['#16191D', '#38BDF8', '#BAE6FD'],
+        ['#161B19', '#34D399', '#A7F3D0'],
+        ['#1B181E', '#C084FC', '#E9D5FF']
+      ];
+      const [bg, c1, c2] = palettes[h % palettes.length];
+      let shapes = '';
+
+      if (style === 'identicon') {
+        const rot = (h % 4) * 90;
+        const innerScale = 0.72 + ((h >> 3) % 4) * 0.08;
+        shapes = `
+          <g transform="rotate(${rot} 50 50)">
+            <circle cx="34" cy="34" r="${Math.round(22 * innerScale)}" fill="${c1}"/>
+            <path d="M50,50 L86,50 A36,36 0 0,1 50,86 Z" fill="${c2}" fill-opacity="0.88"/>
+            <rect x="16" y="56" width="26" height="26" rx="6" fill="${c1}" fill-opacity="0.38"/>
+          </g>`;
+      } else if (style === 'avataaars') {
+        const shoulderY = 64 + (h % 7);
+        const headR = 14 + (h % 4);
+        const headY = 35 + ((h >> 2) % 4);
+        shapes = `
+          <circle cx="50" cy="${headY}" r="${headR}" fill="${c1}"/>
+          <path d="M18,92 C18,${shoulderY} 82,${shoulderY} 82,92 Z" fill="${c2}"/>`;
+      } else if (style === 'bottts') {
+        const offsetX = -7 + (h % 15);
+        const offsetY = -7 + ((h >> 4) % 15);
+        const rOuter = 29 + (h % 6);
+        shapes = `
+          <circle cx="${50 + offsetX}" cy="${50 + offsetY}" r="${rOuter}" fill="none" stroke="${c1}" stroke-width="3" stroke-opacity="0.45"/>
+          <circle cx="${50 - offsetX}" cy="${50 - offsetY}" r="19" fill="none" stroke="${c1}" stroke-width="3.5"/>
+          <circle cx="50" cy="50" r="7" fill="${c2}"/>`;
+      } else {
+        // 5x5 symmetric mosaic grid using secondary hash mixing so seeds stay distinct
+        const h2 = hashSeedInt(`${seed}:${style}:mosaic`);
+        let activeCells = 0;
+        for (let r = 0; r < 5; r++) {
+          for (let c = 0; c < 3; c++) {
+            const bitIndex = r * 3 + c;
+            const bit = ((h ^ (h2 >>> (bitIndex % 8))) >>> bitIndex) & 1;
+            if (bit) {
+              activeCells++;
+              const x1 = 16 + c * 14;
+              const x2 = 16 + (4 - c) * 14;
+              const col = ((h2 >>> bitIndex) & 1) ? c1 : c2;
+              shapes += `<rect x="${x1}" y="${16 + r * 14}" width="12" height="12" rx="2.5" fill="${col}"/>`;
+              if (x1 !== x2) shapes += `<rect x="${x2}" y="${16 + r * 14}" width="12" height="12" rx="2.5" fill="${col}"/>`;
+            }
+          }
+        }
+        if (activeCells < 3) {
+          shapes += `<rect x="44" y="30" width="12" height="40" rx="3" fill="${c1}"/><rect x="30" y="44" width="40" height="12" rx="3" fill="${c2}"/>`;
+        }
+      }
+
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="${bg}"/>${shapes}</svg>`;
+      return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+    }
+
+    function getUserAvatarUrl(username, explicitAvatar = null) {
+      const key = String(username || '').trim().toLowerCase();
+      if (key && key === currentUser) {
+        return getDiceBearUrl(currentAvatar);
+      }
+      if (explicitAvatar) {
+        if (key) userAvatarCache.set(key, explicitAvatar);
+        return getDiceBearUrl(explicitAvatar);
+      }
+      if (key && userAvatarCache.has(key)) {
+        return getDiceBearUrl(userAvatarCache.get(key));
+      }
+      return getDiceBearUrl(`pixel-art:${key || 'user'}`);
+    }
+
+    function updateCurrentUserAvatar(avatarStr) {
+      const targetUrl = getDiceBearUrl(avatarStr || currentAvatar || `pixel-art:${currentUser || 'user'}`);
+      const navAvatar = document.getElementById('navAvatarImg');
+      if (navAvatar) navAvatar.src = targetUrl;
+    }
+
+    function openProfileModal() {
+      const [style, seed] = currentAvatar.split(':');
+      tempAvatarStyle = style || 'pixel-art';
+      tempAvatarSeed = seed || currentUser;
+      updatePfpPreview();
+      document.getElementById('profileModal').classList.remove('hidden');
+    }
+
+    function closeProfileModal() {
+      document.getElementById('profileModal').classList.add('hidden');
+    }
+
+    function setPfpStyle(style) {
+      tempAvatarStyle = style;
+      updatePfpPreview();
+    }
+
+    function rollRandomAvatarSeed() {
+      tempAvatarSeed = Math.random().toString(36).substring(2, 9);
+      updatePfpPreview();
+    }
+
+    function updatePfpPreview() {
+      document.getElementById('pfpPreviewTarget').src = getDiceBearUrl(`${tempAvatarStyle}:${tempAvatarSeed}`);
+    }
+
+    function setAppTheme(t) {
+      applyTheme(t);
+    }
+
+    async function saveProfileAndTheme() {
+      currentAvatar = `${tempAvatarStyle}:${tempAvatarSeed}`;
+      if (currentUser) userAvatarCache.set(currentUser, currentAvatar);
+      updateCurrentUserAvatar(currentAvatar);
+      localStorage.setItem('snap_avatar', currentAvatar);
+      closeProfileModal();
+
+      try {
+        await fetch(`${BASE_URL}/profile`, {
+          method: 'POST',
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ avatar: currentAvatar, theme: currentTheme })
+        });
+        showToast('Profile updated');
+        if (lastMessagesCache.length > 0) renderMessages(lastMessagesCache, false);
+        fetchStories();
+      } catch (e) {}
+    }
+
+    // --------------------------------------------------------
+    // FRIENDS MENU, REQUEST BADGES & DIRECTORY SEARCH
+    // --------------------------------------------------------
+    async function fetchFriends() {
+      try {
+        const res = await fetch(`${BASE_URL}/friends`, { headers: getAuthHeaders() });
+        if (!res.ok) return;
+        const data = await res.json();
+        friendsData = {
+          incoming: data.incoming || [],
+          outgoing: data.outgoing || [],
+          friends: data.friends || []
+        };
+        [...friendsData.incoming, ...friendsData.outgoing, ...friendsData.friends].forEach(u => {
+          if (u.username && u.avatar) userAvatarCache.set(u.username.toLowerCase(), u.avatar);
+        });
+        pendingFriendRequestsCount = friendsData.incoming.length;
+        updateFriendNotificationBadges();
+        renderFriendsModalLists();
+      } catch (e) {}
+    }
+
+    function updateFriendNotificationBadges() {
+      const count = pendingFriendRequestsCount;
+      const topBadge = document.getElementById('friendsBadgeCount');
+      const modalBadge = document.getElementById('friendsModalBadge');
+      const sidebarPill = document.getElementById('sidebarRequestsPill');
+
+      if (count > 0) {
+        topBadge.textContent = count > 99 ? '99+' : String(count);
+        topBadge.classList.remove('hidden');
+        modalBadge.textContent = String(count);
+        modalBadge.classList.remove('hidden');
+        sidebarPill.textContent = `${count} request${count > 1 ? 's' : ''}`;
+        sidebarPill.classList.remove('hidden');
+      } else {
+        topBadge.classList.add('hidden');
+        modalBadge.classList.add('hidden');
+        sidebarPill.classList.add('hidden');
+      }
+      updateTabTitle();
+    }
+
+    function openFriendsModal() {
+      removeConfirmTarget = null;
+      document.getElementById('friendsModal').classList.remove('hidden');
+      fetchFriends();
+    }
+
+    function closeFriendsModal() {
+      removeConfirmTarget = null;
+      document.getElementById('friendsModal').classList.add('hidden');
+    }
+
+    function renderFriendsModalLists() {
+      const incSec = document.getElementById('incomingRequestsSection');
+      const incList = document.getElementById('incomingRequestsList');
+      if (friendsData.incoming.length > 0) {
+        incSec.classList.remove('hidden');
+        incList.innerHTML = friendsData.incoming.map(u => `
+          <div class="px-3 py-2 bg-[var(--bg-app)] flex items-center justify-between gap-2 min-h-[44px]">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <img src="${getDiceBearUrl(u.avatar || `pixel-art:${u.username}`)}" class="w-7 h-7 rounded-md object-cover shrink-0 border border-[var(--border-color)]" alt="avatar">
+              <span class="text-xs font-semibold text-[var(--text-primary)] truncate">@${escapeHtml(u.username)}</span>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button type="button" onclick="acceptFriendRequest('${escapeHtml(u.username)}')" class="min-h-[32px] px-2.5 rounded-md bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--accent-text)] text-xs font-semibold transition">Accept</button>
+              <button type="button" onclick="removeFriendOrRequest('${escapeHtml(u.username)}', true)" title="Decline" class="min-w-[32px] min-h-[32px] rounded-md border border-[var(--border-color)] hover:border-[var(--danger)] text-[var(--subtext)] hover:text-[var(--danger)] flex items-center justify-center text-xs transition">✕</button>
+            </div>
+          </div>
+        `).join('');
+      } else {
+        incSec.classList.add('hidden');
+        incList.innerHTML = '';
+      }
+
+      const outSec = document.getElementById('outgoingRequestsSection');
+      const outList = document.getElementById('outgoingRequestsList');
+      if (friendsData.outgoing.length > 0) {
+        outSec.classList.remove('hidden');
+        outList.innerHTML = friendsData.outgoing.map(u => `
+          <div class="px-3 py-2 bg-[var(--bg-app)] flex items-center justify-between gap-2 min-h-[44px]">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <img src="${getDiceBearUrl(u.avatar || `pixel-art:${u.username}`)}" class="w-7 h-7 rounded-md object-cover shrink-0 border border-[var(--border-color)]" alt="avatar">
+              <span class="text-xs font-medium text-[var(--text-secondary)] truncate">@${escapeHtml(u.username)}</span>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              <span class="text-[11px] text-[var(--subtext)]">Pending</span>
+              <button type="button" onclick="removeFriendOrRequest('${escapeHtml(u.username)}', true)" title="Cancel request" class="min-w-[32px] min-h-[32px] rounded-md border border-[var(--border-color)] hover:border-[var(--danger)] text-[var(--subtext)] hover:text-[var(--danger)] flex items-center justify-center text-xs transition">✕</button>
+            </div>
+          </div>
+        `).join('');
+      } else {
+        outSec.classList.add('hidden');
+        outList.innerHTML = '';
+      }
+
+      const roster = document.getElementById('friendsRosterList');
+      if (friendsData.friends.length === 0) {
+        roster.innerHTML = `<p class="text-xs text-[var(--subtext)] p-3">No friends added yet. Search above to connect.</p>`;
+      } else {
+        roster.innerHTML = friendsData.friends.map(u => {
+          const isConfirming = removeConfirmTarget === u.username;
+          return `
+            <div class="px-3 py-2 bg-[var(--bg-app)] flex items-center justify-between gap-2 min-h-[44px]">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <img src="${getDiceBearUrl(u.avatar || `pixel-art:${u.username}`)}" class="w-7 h-7 rounded-md object-cover shrink-0 border border-[var(--border-color)]" alt="avatar">
+                <span class="text-xs font-semibold text-[var(--text-primary)] truncate">@${escapeHtml(u.username)}</span>
+              </div>
+              <div class="flex items-center gap-1.5 shrink-0">
+                <button type="button" onclick="closeFriendsModal(); selectConversation('dm', '${escapeHtml(u.username)}')" class="min-h-[32px] px-2.5 rounded-md bg-[var(--bg-card)] hover:bg-[var(--bg-card-hover)] border border-[var(--border-color)] text-[var(--text-primary)] text-xs font-medium transition">Message</button>
+                <button type="button" onclick="handleRemoveFriendTap('${escapeHtml(u.username)}')" class="min-h-[32px] px-2.5 rounded-md ${isConfirming ? 'bg-[var(--danger)] text-white border border-[var(--danger)]' : 'border border-[var(--border-color)] hover:border-[var(--danger)] text-[var(--subtext)] hover:text-[var(--danger)]'} text-xs font-medium transition">
+                  ${isConfirming ? 'Confirm?' : 'Remove'}
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+      lucide.createIcons();
+    }
+
+    function handleRemoveFriendTap(username) {
+      if (removeConfirmTarget === username) {
+        removeConfirmTarget = null;
+        if (removeConfirmTimer) clearTimeout(removeConfirmTimer);
+        removeFriendOrRequest(username, false);
+      } else {
+        removeConfirmTarget = username;
+        renderFriendsModalLists();
+        if (removeConfirmTimer) clearTimeout(removeConfirmTimer);
+        removeConfirmTimer = setTimeout(() => {
+          removeConfirmTarget = null;
+          renderFriendsModalLists();
+        }, 4000);
+      }
+    }
+
+    async function sendFriendRequest(username) {
+      try {
+        const res = await fetch(`${BASE_URL}/friends/add`, {
+          method: 'POST',
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ username })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Could not send request');
+        showToast(data.status === 'accepted' ? `Connected with @${username}` : `Request sent to @${username}`);
+        fetchFriends();
+        const q = document.getElementById('directorySearchInput').value;
+        if (q.trim().length >= 2) searchDirectoryUsers(q);
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function acceptFriendRequest(username) {
+      try {
+        const res = await fetch(`${BASE_URL}/friends/accept`, {
+          method: 'POST',
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ username })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to accept');
+        showToast(`Accepted @${username}`);
+        fetchFriends();
+        fetchStories();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function removeFriendOrRequest(username, isRequestOnly = false) {
+      try {
+        const res = await fetch(`${BASE_URL}/friends/remove`, {
+          method: 'POST',
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ username })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to remove');
+        showToast(isRequestOnly ? `Cleared request for @${username}` : `Removed @${username}`);
+        fetchFriends();
+        fetchStories();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    let dirSearchTimer = null;
+    function searchDirectoryUsers(q) {
+      if (dirSearchTimer) clearTimeout(dirSearchTimer);
+      const trimmed = (q || '').trim();
+      const list = document.getElementById('directoryResultsList');
+      if (trimmed.length < 2) {
+        list.innerHTML = `<p class="text-xs text-[var(--subtext)] py-2">Type at least 2 characters to search users.</p>`;
+        return;
+      }
+
+      dirSearchTimer = setTimeout(async () => {
+        try {
+          const res = await fetch(`${BASE_URL}/users?q=${encodeURIComponent(trimmed)}`, { headers: getAuthHeaders() });
+          if (!res.ok) return;
+          const data = await res.json();
+          const users = data.users || [];
+
+          if (users.length === 0) {
+            list.innerHTML = `<p class="text-xs text-[var(--subtext)] py-2">No matching users found.</p>`;
+            return;
+          }
+
+          list.innerHTML = users.map(u => {
+            const isOwner = u.username.toLowerCase() === 'bzn';
+            let actionBtn = '';
+            if (u.relation === 'friends') {
+              actionBtn = `<button type="button" onclick="closeFriendsModal(); selectConversation('dm', '${escapeHtml(u.username)}')" class="min-h-[30px] px-2.5 rounded-md bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)] text-xs font-medium">Message</button>`;
+            } else if (u.relation === 'outgoing') {
+              actionBtn = `<span class="text-[11px] text-[var(--subtext)] px-1.5">Sent</span>`;
+            } else if (u.relation === 'incoming') {
+              actionBtn = `<button type="button" onclick="acceptFriendRequest('${escapeHtml(u.username)}')" class="min-h-[30px] px-2.5 rounded-md bg-[var(--accent)] text-[var(--accent-text)] text-xs font-semibold">Accept</button>`;
+            } else {
+              actionBtn = `<button type="button" onclick="sendFriendRequest('${escapeHtml(u.username)}')" class="min-h-[30px] px-2.5 rounded-md bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--accent-text)] text-xs font-semibold">Add</button>`;
+            }
+            return `
+              <div class="py-2 flex items-center justify-between gap-2 min-h-[40px]">
+                <div class="flex items-center gap-2 min-w-0">
+                  <img src="${getDiceBearUrl(u.avatar || `pixel-art:${u.username}`)}" class="w-6 h-6 rounded object-cover shrink-0 border border-[var(--border-color)]" alt="avatar">
+                  <span class="text-xs font-medium text-[var(--text-primary)] truncate">@${escapeHtml(u.username)}</span>
+                  ${isOwner ? `<span class="px-1.5 py-0.5 rounded bg-[var(--accent-soft)] border border-[var(--accent)]/40 text-[10px] font-semibold text-[var(--accent)] leading-none shrink-0">Owner</span>` : ''}
+                </div>
+                ${actionBtn}
+              </div>
+            `;
+          }).join('');
+        } catch (e) {}
+      }, 260);
+    }
+
+    // --------------------------------------------------------
+    // 24H STORIES ENGINE (FRIENDS ONLY, YELLOW RING)
+    // --------------------------------------------------------
+    async function fetchStories() {
+      try {
+        const res = await fetch(`${BASE_URL}/stories`, {
+          method: 'GET',
+          headers: getAuthHeaders()
+        });
+        if (res.ok) {
+          const data = await res.json();
+          activeStories = data.stories || {};
+          renderStories();
+        }
+      } catch (e) {}
+    }
+
+    function renderStories() {
+      const container = document.getElementById('storiesContainer');
+      const authors = Object.keys(activeStories);
+
+      if (authors.length === 0) {
+        container.innerHTML = `<span class="text-xs text-[var(--subtext)] pl-1">No active stories</span>`;
+        return;
+      }
+
+      let html = '';
+      authors.forEach(author => {
+        const isSelf = author.toLowerCase() === currentUser;
+        const firstStory = (activeStories[author] || [])[0];
+        const avatarUrl = getUserAvatarUrl(author, firstStory && firstStory.avatar);
+
+        html += `
+          <button type="button" onclick="openStoryViewer('${escapeHtml(author)}')" class="flex flex-col items-center gap-1 shrink-0 min-w-[48px] group">
+            <div class="story-ring-active rounded-lg transition group-hover:scale-[1.03]">
+              <div class="w-10 h-10 rounded-[5px] bg-[var(--bg-sidebar)] overflow-hidden">
+                <img src="${avatarUrl}" class="w-full h-full object-cover" alt="story avatar">
+              </div>
+            </div>
+            <span class="text-[11px] font-medium text-[var(--text-secondary)] truncate max-w-[56px] text-center">
+              ${isSelf ? 'You' : escapeHtml(author)}
+            </span>
+          </button>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function openStoryPostModal() {
+      pendingStoryImage = null;
+      document.getElementById('storyImagePreview').classList.add('hidden');
+      document.getElementById('storyUploadPlaceholder').classList.remove('hidden');
+      document.getElementById('storyCaptionInput').value = '';
+      document.getElementById('storyPostModal').classList.remove('hidden');
+    }
+
+    function closeStoryPostModal() {
+      document.getElementById('storyPostModal').classList.add('hidden');
+    }
+
+    async function submitStoryPost() {
+      const caption = document.getElementById('storyCaptionInput').value.trim();
+      if (!pendingStoryImage && !caption) {
+        showToast('Image or caption required for story', 'error');
+        return;
+      }
+
+      try {
+        const res = await fetch(`${BASE_URL}/story/post`, {
+          method: 'POST',
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ image: pendingStoryImage, caption })
+        });
+
+        if (res.ok) {
+          showToast('Story published');
+          closeStoryPostModal();
+          fetchStories();
+        } else {
+          const err = await res.json();
+          showToast(err.error || 'Failed to post story', 'error');
+        }
+      } catch (e) {
+        showToast('Network error', 'error');
+      }
+    }
+
+    function openStoryViewer(author) {
+      const list = activeStories[author];
+      if (!list || list.length === 0) return;
+
+      storyPlaybackList = list;
+      storyPlaybackIndex = 0;
+      const isOwner = author.toLowerCase() === 'bzn';
+      document.getElementById('storyViewerAuthor').innerHTML = `@${escapeHtml(author)}${isOwner ? ` <span class="ml-1 px-1.5 py-0.5 rounded bg-[var(--accent)] text-[var(--accent-text)] text-[10px] font-bold">Owner</span>` : ''}`;
+      document.getElementById('storyViewerAvatar').src = getUserAvatarUrl(author, list[0] && list[0].avatar);
+      document.getElementById('storyViewerModal').classList.remove('hidden');
+      showStorySlide();
+    }
+
+    function showStorySlide() {
+      if (storyTimer) clearInterval(storyTimer);
+
+      const story = storyPlaybackList[storyPlaybackIndex];
+      if (!story) {
+        closeStoryViewer();
+        return;
+      }
+
+      const imgEl = document.getElementById('storyViewerImg');
+      const capWrap = document.getElementById('storyViewerCaptionWrap');
+      const capEl = document.getElementById('storyViewerCaption');
+      const timeEl = document.getElementById('storyViewerTime');
+
+      if (story.image) {
+        imgEl.src = story.image;
+        imgEl.classList.remove('hidden');
+      } else {
+        imgEl.classList.add('hidden');
+      }
+
+      if (story.caption) {
+        capEl.textContent = story.caption;
+        capWrap.classList.remove('hidden');
+      } else {
+        capWrap.classList.add('hidden');
+      }
+
+      timeEl.textContent = formatRelative(story.created_at);
+
+      const fill = document.getElementById('storyProgressFill');
+      fill.style.width = '0%';
+      let progress = 0;
+      const stepMs = 50;
+      const totalMs = 4500;
+
+      storyTimer = setInterval(() => {
+        progress += (stepMs / totalMs) * 100;
+        fill.style.width = `${Math.min(progress, 100)}%`;
+
+        if (progress >= 100) {
+          clearInterval(storyTimer);
+          storyPlaybackIndex++;
+          if (storyPlaybackIndex < storyPlaybackList.length) {
+            showStorySlide();
+          } else {
+            closeStoryViewer();
+          }
+        }
+      }, stepMs);
+    }
+
+    function handleStoryViewerClick(e) {
+      if (e.clientX < window.innerWidth * 0.35) {
+        if (storyPlaybackIndex > 0) {
+          storyPlaybackIndex--;
+          showStorySlide();
+        }
+      } else {
+        storyPlaybackIndex++;
+        if (storyPlaybackIndex < storyPlaybackList.length) {
+          showStorySlide();
+        } else {
+          closeStoryViewer();
+        }
+      }
+    }
+
+    function closeStoryViewer() {
+      if (storyTimer) clearInterval(storyTimer);
+      document.getElementById('storyViewerModal').classList.add('hidden');
+    }
+
+    // --------------------------------------------------------
+    // INBOX, PRESENCE & FEED DATA SYNC
+    // --------------------------------------------------------
+    let dismissedBannerText = '';
+
+    function dismissSystemBanner() {
+      dismissedBannerText = document.getElementById('systemNoticeText').textContent;
+      document.getElementById('systemNoticeBanner').classList.add('hidden');
+    }
+
+    async function fetchSystemConfig() {
+      try {
+        const res = await fetch(`${BASE_URL}/config`);
+        if (!res.ok) return;
+        const cfg = await res.json();
+        const bannerWrap = document.getElementById('systemNoticeBanner');
+        const bannerText = document.getElementById('systemNoticeText');
+        const msg = (cfg.system_banner || '').trim();
+
+        if (msg && msg !== dismissedBannerText) {
+          bannerText.textContent = msg;
+          bannerWrap.classList.remove('hidden');
+        } else if (!msg) {
+          bannerWrap.classList.add('hidden');
+        }
+      } catch (e) {}
+    }
+
+    async function syncData() {
+      if (!currentUser) return;
+      await Promise.all([
+        fetchSystemConfig(),
+        fetchStories(),
+        fetchFriends(),
+        fetchInbox(),
+        syncPresence()
+      ]);
+
+      if (activeChatType === 'global') {
+        await fetchGlobalFeed(false);
+      } else if (activeChatType === 'dm' && activeRecipient) {
+        await fetchDmThread(activeRecipient, false);
+      }
+    }
+
+    function handleComposerTyping() {
+      if (activeChatType !== 'dm' || !activeRecipient) return;
+      if (!isTypingNow) {
+        isTypingNow = true;
+        syncPresence();
+      }
+      if (typingStopTimer) clearTimeout(typingStopTimer);
+      typingStopTimer = setTimeout(() => {
+        isTypingNow = false;
+        syncPresence();
+      }, 2200);
+    }
+
+    async function syncPresence() {
+      if (!authToken) return;
+      try {
+        const res = await fetch(`${BASE_URL}/presence`, {
+          method: 'POST',
+          headers: getAuthHeaders(),
+          body: JSON.stringify({
+            with: activeChatType === 'dm' ? activeRecipient : 'global',
+            typing: isTypingNow
+          })
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (activeChatType === 'dm' && activeRecipient) {
+          const statusEl = document.getElementById('chatStatusText');
+          if (data.peer && data.peer.typing) {
+            statusEl.textContent = 'Typing…';
+            statusEl.className = 'text-[11px] text-[var(--accent)] font-medium leading-none mt-1 block';
+          } else if (data.peer && data.peer.inChat) {
+            statusEl.textContent = 'Active in thread';
+            statusEl.className = 'text-[11px] text-emerald-500 font-medium leading-none mt-1 block';
+          } else {
+            statusEl.textContent = 'Direct message';
+            statusEl.className = 'text-[11px] text-[var(--subtext)] leading-none mt-1 block';
+          }
+        }
+      } catch (e) {}
+    }
+
+    async function fetchInbox() {
+      try {
+        const res = await fetch(`${BASE_URL}/inbox`, {
+          method: 'GET',
+          headers: getAuthHeaders()
+        });
+
+        if (res.status === 429) throw { status: 429 };
+
+        if (res.ok) {
+          const data = await res.json();
+          const list = data.inbox || data.threads || [];
+          renderInbox(list);
+          if (PollEngine.channel && PollEngine.isLeader) {
+            PollEngine.channel.postMessage({ type: "SYNC_INBOX", payload: list });
+          }
+        }
+      } catch (e) {
+        if (e && e.status === 429) throw e;
+      }
+    }
+
+    function renderInbox(threads) {
+      const container = document.getElementById('dmThreadsTarget');
+      totalUnreadDms = 0;
+
+      if (!threads || threads.length === 0) {
+        updateTabTitle();
+        container.innerHTML = `
+          <div class="px-4 py-8 text-center text-[var(--subtext)] text-xs space-y-1">
+            <p class="font-medium text-[var(--text-secondary)]">No direct messages</p>
+            <p>Add a friend to start a conversation.</p>
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+      threads.forEach(t => {
+        const peer = (t.user || '').toLowerCase();
+        if (peer === currentUser) return;
+
+        const unreadCount = Number(t.unread || 0);
+        const unreadSnaps = Number(t.unread_snaps || 0);
+        const unreadChats = Number(t.unread_chats || 0);
+        totalUnreadDms += unreadCount;
+
+        let statusIcon = '';
+        let statusLabel = '';
+
+        if (unreadSnaps > 0 && unreadChats > 0) {
+          statusIcon = `<span class="w-2 h-2 rounded-sm bg-[var(--accent)] inline-block shrink-0"></span>`;
+          statusLabel = `<span class="text-[var(--text-primary)] font-semibold">New snap &amp; chat</span>`;
+        } else if (unreadSnaps > 0) {
+          statusIcon = `<span class="w-2 h-2 rounded-sm bg-[var(--accent)] inline-block shrink-0"></span>`;
+          statusLabel = `<span class="text-[var(--accent)] font-semibold">New snap (${unreadSnaps})</span>`;
+        } else if (unreadChats > 0) {
+          statusIcon = `<span class="w-2 h-2 rounded-sm bg-[var(--accent)] inline-block shrink-0"></span>`;
+          statusLabel = `<span class="text-[var(--text-primary)] font-semibold">New chat (${unreadChats})</span>`;
+        } else if (t.receipt === 'opened') {
+          statusIcon = `<i data-lucide="check-check" class="w-3 h-3 text-[var(--subtext)] shrink-0"></i>`;
+          statusLabel = `<span class="text-[var(--subtext)]">Opened</span>`;
+        } else if (t.receipt === 'delivered') {
+          statusIcon = `<i data-lucide="check" class="w-3 h-3 text-[var(--accent)] shrink-0"></i>`;
+          statusLabel = `<span class="text-[var(--subtext)]">Delivered</span>`;
+        } else {
+          statusIcon = `<i data-lucide="corner-down-right" class="w-3 h-3 text-[var(--subtext)] shrink-0"></i>`;
+          statusLabel = `<span class="text-[var(--subtext)]">Received</span>`;
+        }
+
+        const streakBadge = t.streak > 0 ? `<span class="text-[11px] font-medium text-[var(--subtext)]">🔥 ${t.streak}</span>` : '';
+        const timeStr = t.last_time ? formatRelative(t.last_time) : '';
+        const isSelected = activeChatType === 'dm' && activeRecipient === peer;
+        const isPeerOwner = peer === 'bzn';
+        const avatarUrl = getUserAvatarUrl(peer, t.avatar);
+
+        html += `
+          <div onclick="selectConversation('dm', '${escapeHtml(peer)}', ${t.streak || 0})" class="px-3.5 py-2.5 min-h-[52px] ${isSelected ? 'thread-active' : 'hover:bg-[var(--bg-card-hover)]'} transition cursor-pointer flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <div class="w-8 h-8 rounded-md bg-[var(--bg-card)] border border-[var(--border-color)] overflow-hidden shrink-0">
+                <img src="${avatarUrl}" class="w-full h-full object-cover" alt="avatar">
+              </div>
+              <div class="min-w-0">
+                <div class="flex items-center gap-1.5">
+                  <span class="text-[13px] font-semibold text-[var(--text-primary)] truncate">@${escapeHtml(peer)}</span>
+                  ${isPeerOwner ? `<span class="px-1.5 py-0.5 rounded bg-[var(--accent-soft)] border border-[var(--accent)]/40 text-[10px] font-semibold text-[var(--accent)] leading-none shrink-0">Owner</span>` : ''}
+                  ${streakBadge}
+                </div>
+                <div class="flex items-center gap-1.5 text-xs mt-0.5 truncate">
+                  ${statusIcon}
+                  ${statusLabel}
+                </div>
+              </div>
+            </div>
+            <div class="flex flex-col items-end gap-1 shrink-0">
+              <span class="text-[11px] text-[var(--subtext)]">${escapeHtml(timeStr)}</span>
+              ${unreadCount > 0 ? `<span class="min-w-[17px] h-[17px] px-1 rounded-full bg-[var(--accent)] text-[var(--accent-text)] text-[10px] font-bold flex items-center justify-center leading-none">${unreadCount}</span>` : ''}
+            </div>
+          </div>
+        `;
+      });
+
+      updateTabTitle();
+      container.innerHTML = html;
+      lucide.createIcons();
+    }
+
+    // --------------------------------------------------------
+    // CONVERSATION SELECTION
+    // --------------------------------------------------------
+    function selectConversation(type, peer = null, streak = 0) {
+      activeChatType = type;
+      activeRecipient = peer ? peer.trim().toLowerCase() : null;
+      isTypingNow = false;
+
+      const globalCard = document.getElementById('threadPillGlobal');
+      const chatTitle = document.getElementById('chatTitle');
+      const chatStatus = document.getElementById('chatStatusText');
+      const avatarWrap = document.getElementById('chatAvatarWrap');
+      const streakPill = document.getElementById('chatStreakPill');
+
+      if (type === 'global') {
+        globalCard.classList.add('thread-active');
+        chatTitle.textContent = 'Global chat';
+        chatStatus.textContent = 'Public live feed';
+        chatStatus.className = 'text-[11px] text-[var(--subtext)] leading-none mt-1 block truncate';
+        avatarWrap.innerHTML = '<span class="text-[var(--accent)] font-bold">#</span>';
+        streakPill.classList.add('hidden');
+        fetchGlobalFeed(true);
+      } else {
+        globalCard.classList.remove('thread-active');
+        if (activeRecipient === 'bzn') {
+          chatTitle.innerHTML = `@${escapeHtml(activeRecipient)} <span class="ml-1 px-1.5 py-0.5 rounded bg-[var(--accent-soft)] border border-[var(--accent)]/40 text-[10px] font-semibold text-[var(--accent)] align-middle">Owner</span>`;
+        } else {
+          chatTitle.textContent = `@${activeRecipient}`;
+        }
+        chatStatus.textContent = 'Direct message';
+        chatStatus.className = 'text-[11px] text-[var(--subtext)] leading-none mt-1 block truncate';
+        avatarWrap.innerHTML = `<img src="${getUserAvatarUrl(activeRecipient)}" class="w-full h-full object-cover">`;
+        if (streak > 0) {
+          streakPill.textContent = `🔥 ${streak}`;
+          streakPill.classList.remove('hidden');
+        } else {
+          streakPill.classList.add('hidden');
+        }
+        fetchDmThread(activeRecipient, true);
+      }
+
+      if (window.innerWidth < 768) {
+        document.getElementById('sidebarPane').classList.add('hidden');
+      }
+
+      syncPresence();
+      document.getElementById('chatInputText').focus();
+    }
+
+    function closeMobileChat() {
+      document.getElementById('sidebarPane').classList.remove('hidden');
+      activeChatType = 'global';
+      activeRecipient = null;
+      clearPendingImage();
+      fetchInbox();
+    }
+
+    async function fetchGlobalFeed(forceScroll = false) {
+      try {
+        const res = await fetch(`${BASE_URL}/read`, {
+          method: 'GET',
+          headers: getAuthHeaders()
+        });
+        if (res.status === 429) throw { status: 429 };
+        if (res.ok) {
+          const data = await res.json();
+          const msgs = data.messages || [];
+          renderMessages(msgs, forceScroll);
+          if (msgs.length > 0) {
+            const last = msgs[msgs.length - 1];
+            document.getElementById('globalLastSnippet').textContent = `${last.user}: ${last.text || 'Photo attachment'}`;
+          }
+          if (PollEngine.channel && PollEngine.isLeader) {
+            PollEngine.channel.postMessage({ type: "SYNC_GLOBAL", payload: msgs });
+          }
+        }
+      } catch (e) {
+        if (e && e.status === 429) throw e;
+      }
+    }
+
+    async function fetchDmThread(peer, forceScroll = false) {
+      if (!peer) return;
+      try {
+        const isFocused = document.hasFocus() && !document.hidden ? "1" : "0";
+        const res = await fetch(`${BASE_URL}/read-dm?with=${encodeURIComponent(peer.toLowerCase())}&focus=${isFocused}`, {
+          method: 'GET',
+          headers: getAuthHeaders()
+        });
+        if (res.status === 429) throw { status: 429 };
+        if (res.ok) {
+          const data = await res.json();
+          renderMessages(data.messages || [], forceScroll);
+        }
+      } catch (e) {
+        if (e && e.status === 429) throw e;
+      }
+    }
+
+    async function toggleMessageReaction(messageId, emoji) {
+      try {
+        const res = await fetch(`${BASE_URL}/react`, {
+          method: 'POST',
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ message_id: messageId, emoji })
+        });
+        if (res.ok) {
+          if (activeChatType === 'global') fetchGlobalFeed(false);
+          else if (activeRecipient) fetchDmThread(activeRecipient, false);
+        }
+      } catch (e) {}
+    }
+
+    async function ownerDeleteMessage(messageId) {
+      if (currentUser !== 'bzn' || !messageId) return;
+      try {
+        const res = await fetch(`${BASE_URL}/admin/delete-message`, {
+          method: 'POST',
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ id: messageId })
+        });
+        if (res.ok) {
+          showToast('Message removed');
+          if (activeChatType === 'global') fetchGlobalFeed(false);
+          else if (activeRecipient) fetchDmThread(activeRecipient, false);
+        }
+      } catch (e) {}
+    }
+
+    // --------------------------------------------------------
+    // 5-MINUTE GROUPED HAIRLINE MESSAGE STREAM
+    // --------------------------------------------------------
+    const GROUP_WINDOW_MS = 5 * 60 * 1000;
+
+    function renderMessages(messages, forceScroll = false) {
+      lastMessagesCache = messages || [];
+      const container = document.getElementById('messagesStream');
+
+      if (!messages || messages.length === 0) {
+        container.innerHTML = `
+          <div class="h-full flex flex-col items-center justify-center text-[var(--subtext)] text-xs gap-1 px-6 text-center">
+            <p class="font-semibold text-[var(--text-secondary)]">No messages yet</p>
+            <p>Start the conversation below.</p>
+          </div>
+        `;
+        return;
+      }
+
+      let html = '<div class="py-1">';
+      let prevSender = null;
+      let prevTime = 0;
+
+      messages.forEach((msg, idx) => {
+        const author = (msg.user || 'unknown');
+        const authorKey = author.toLowerCase();
+        const isSelf = authorKey === currentUser;
+        const isOwnerMsg = authorKey === 'bzn';
+        const msgTime = Number(msg.time || 0);
+        const timeStr = msgTime ? new Date(msgTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+
+        const isGrouped =
+          prevSender === authorKey &&
+          prevTime > 0 &&
+          msgTime > 0 &&
+          Math.abs(msgTime - prevTime) <= GROUP_WINDOW_MS;
+
+        prevSender = authorKey;
+        prevTime = msgTime;
+
+        let nameColor = isSelf ? 'var(--accent)' : 'var(--text-primary)';
+        if (isOwnerMsg) {
+          nameColor = 'var(--accent)';
+        } else if (activeChatType === 'global' && !isSelf) {
+          nameColor = getGroupAuthorColor(author);
+        }
+
+        const ownerBadgeHtml = isOwnerMsg
+          ? `<span class="px-1.5 py-0.5 rounded bg-[var(--accent-soft)] border border-[var(--accent)]/40 text-[10px] font-semibold text-[var(--accent)] leading-none shrink-0">Owner</span>`
+          : '';
+
+        let mediaHtml = '';
+        if (activeChatType === 'dm' && msg.has_image && !msg.image) {
+          if (isSelf) {
+            mediaHtml = `<div class="mt-1 text-xs text-[var(--subtext)] italic">${msg.read === 1 ? 'Snap opened' : 'Snap delivered'}</div>`;
+          } else {
+            mediaHtml = `
+              <button type="button" onclick="openEphemeralSnap(${msg.id}, '${escapeHtml(author)}')" class="mt-1.5 min-h-[36px] px-3 py-1.5 rounded-md bg-[var(--accent-soft)] hover:bg-[var(--accent)]/20 border border-[var(--accent)]/40 text-xs font-semibold text-[var(--accent)] inline-flex items-center gap-1.5 transition">
+                <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                <span>Tap to view Snap</span>
+              </button>
+            `;
+          }
+        } else if (msg.image) {
+          mediaHtml = `
+            <div class="mt-1.5 cursor-pointer inline-block overflow-hidden rounded-md border border-[var(--border-strong)]" onclick="openMediaViewer('${escapeHtml(msg.image)}', '${escapeHtml(author)}')">
+              <img src="${escapeHtml(msg.image)}" class="max-h-60 w-auto object-cover hover:opacity-95 transition" alt="snap">
+            </div>
+          `;
+        }
+
+        // Reaction Pills
+        const rxList = msg.reactions || [];
+        let rxHtml = '';
+        if (rxList.length > 0) {
+          const counts = {};
+          rxList.forEach(r => { counts[r.emoji] = (counts[r.emoji] || 0) + 1; });
+          rxHtml = `<div class="flex flex-wrap gap-1 mt-1.5">` +
+            Object.entries(counts).map(([em, cnt]) =>
+              `<button type="button" onclick="toggleMessageReaction(${msg.id}, '${em}')" class="px-1.5 py-0.5 rounded bg-[var(--bg-card)] hover:bg-[var(--bg-card-hover)] border border-[var(--border-color)] text-[11px] text-[var(--text-secondary)] inline-flex items-center gap-1 transition">${em} <span>${cnt}</span></button>`
+            ).join('') +
+            `</div>`;
+        }
+
+        const ownerDelBtn = (currentUser === 'bzn' && msg.id)
+          ? `<button type="button" onclick="ownerDeleteMessage(${msg.id})" title="Delete message (Owner)" class="text-xs text-[var(--subtext)] hover:text-[var(--danger)] hover:bg-[var(--danger-soft)] rounded px-1.5 py-0.5 leading-none transition"><i data-lucide="trash-2" class="w-3 h-3"></i></button>`
+          : '';
+
+        const quickRxBar = msg.id ? `
+          <div class="opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition flex items-center gap-0.5 shrink-0 bg-[var(--bg-sidebar)] border border-[var(--border-color)] rounded-md px-1 py-0.5 shadow-sm">
+            ${['❤️', '😂', '🔥', '💀', '👍'].map(em =>
+              `<button type="button" onclick="toggleMessageReaction(${msg.id}, '${em}')" class="text-xs hover:bg-[var(--bg-card)] rounded px-1 py-0.5 leading-none transition">${em}</button>`
+            ).join('')}
+            ${ownerDelBtn}
+          </div>
+        ` : '';
+
+        if (isGrouped) {
+          html += `
+            <div class="group px-3.5 md:px-4 py-0.5 hover:bg-[var(--bg-card)]/40 transition flex items-start gap-2.5">
+              <div class="w-7 shrink-0 flex justify-end pt-0.5">
+                <span class="opacity-0 group-hover:opacity-100 text-[10px] text-[var(--subtext)] select-none transition">${escapeHtml(timeStr)}</span>
+              </div>
+              <div class="flex-1 min-w-0 flex items-start justify-between gap-2">
+                <div class="min-w-0 flex-1">
+                  ${msg.text ? `<div class="text-[14px] text-[var(--text-primary)] leading-snug break-words">${escapeHtml(msg.text)}</div>` : ''}
+                  ${mediaHtml}
+                  ${rxHtml}
+                </div>
+                ${quickRxBar}
+              </div>
+            </div>
+          `;
+        } else {
+          const dividerCls = idx === 0 ? '' : 'border-t border-[var(--border-color)] mt-1.5 pt-2.5';
+          const avatarUrl = getUserAvatarUrl(author, msg.avatar);
+
+          html += `
+            <div class="group px-3.5 md:px-4 pb-1 ${idx === 0 ? 'pt-2' : ''} ${dividerCls} hover:bg-[var(--bg-card)]/40 transition">
+              <div class="flex items-start gap-2.5">
+                <div class="w-7 h-7 mt-0.5 rounded-md border border-[var(--border-color)] overflow-hidden bg-[var(--bg-card)] shrink-0">
+                  <img src="${avatarUrl}" class="w-full h-full object-cover" alt="avatar">
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center justify-between gap-2 min-h-[20px]">
+                    <div class="flex items-center gap-1.5 min-w-0">
+                      <span class="text-[13px] font-semibold truncate" style="color: ${nameColor}">${isSelf ? `@${escapeHtml(currentUser)}` : `@${escapeHtml(author)}`}</span>
+                      ${ownerBadgeHtml}
+                      <span class="text-[11px] text-[var(--subtext)] shrink-0">${escapeHtml(timeStr)}</span>
+                    </div>
+                    ${quickRxBar}
+                  </div>
+                  ${msg.text ? `<div class="text-[14px] text-[var(--text-primary)] leading-snug break-words mt-0.5">${escapeHtml(msg.text)}</div>` : ''}
+                  ${mediaHtml}
+                  ${rxHtml}
+                </div>
+              </div>
+            </div>
+          `;
+        }
+      });
+      html += '</div>';
+
+      const isScrolledToBottom = container.scrollHeight - container.clientHeight <= container.scrollTop + 140;
+      container.innerHTML = html;
+      lucide.createIcons();
+
+      if (forceScroll || isScrolledToBottom) {
+        container.scrollTop = container.scrollHeight;
+      }
+    }
+
+    async function openEphemeralSnap(messageId, author) {
+      try {
+        const res = await fetch(`${BASE_URL}/snap/open`, {
+          method: 'POST',
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ message_id: messageId })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          showToast(data.error || 'Snap expired', 'error');
+          if (activeRecipient) fetchDmThread(activeRecipient, false);
+          fetchInbox();
+          return;
+        }
+        openMediaViewer(data.image, author || data.sender, true);
+        if (activeRecipient) fetchDmThread(activeRecipient, false);
+        fetchInbox();
+      } catch (e) {
+        showToast('Could not open Snap', 'error');
+      }
+    }
+
+    // --------------------------------------------------------
+    // SENDING MESSAGES & CANVAS IMAGE COMPRESSION (EXIF SCRUB)
+    // --------------------------------------------------------
+    function scrubExifAndCompress(file, maxDim = 1200, quality = 0.72) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        const blobUrl = URL.createObjectURL(file);
+        img.onload = () => {
+          URL.revokeObjectURL(blobUrl);
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height && width > maxDim) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else if (height > maxDim) {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.onerror = (err) => {
+          URL.revokeObjectURL(blobUrl);
+          reject(err);
+        };
+        img.src = blobUrl;
+      });
+    }
+
+    async function handleImagePicked(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      try {
+        const compressed = await scrubExifAndCompress(file, 1200, 0.72);
+        pendingCompressedImage = compressed;
+        document.getElementById('imageStagingPreview').src = pendingCompressedImage;
+        const kb = Math.round((pendingCompressedImage.length * 3 / 4) / 1024);
+        document.getElementById('imageStagingSize').textContent = `Snap ready (${kb} KB)`;
+        document.getElementById('imageAttachmentStaging').classList.remove('hidden');
+      } catch (err) {
+        showToast('Failed to process image safely', 'error');
+      }
+      e.target.value = '';
+    }
+
+    async function handleStoryImagePicked(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      try {
+        const compressed = await scrubExifAndCompress(file, 1200, 0.75);
+        pendingStoryImage = compressed;
+        const preview = document.getElementById('storyImagePreview');
+        preview.src = compressed;
+        preview.classList.remove('hidden');
+        document.getElementById('storyUploadPlaceholder').classList.add('hidden');
+      } catch (err) {
+        showToast('Failed to process story photo', 'error');
+      }
+      e.target.value = '';
+    }
+
+    function clearPendingImage() {
+      pendingCompressedImage = null;
+      document.getElementById('imageAttachmentStaging').classList.add('hidden');
+    }
+
+    async function handleSendMessage(e) {
+      if (e) e.preventDefault();
+      const input = document.getElementById('chatInputText');
+      const text = input.value.trim();
+      const sendBtn = document.getElementById('btnSendChat');
+
+      if (!text && !pendingCompressedImage) return;
+
+      sendBtn.disabled = true;
+      isTypingNow = false;
+
+      try {
+        let endpoint = '';
+        let payload = {};
+
+        if (activeChatType === 'global') {
+          endpoint = '/send';
+          payload = { text, image: pendingCompressedImage };
+        } else {
+          endpoint = '/send-dm';
+          payload = { recipient: activeRecipient, text, image: pendingCompressedImage };
+        }
+
+        const res = await fetch(`${BASE_URL}${endpoint}`, {
+          method: 'POST',
+          headers: getAuthHeaders(),
+          body: JSON.stringify(payload)
+        });
+
+        if (res.status === 429) {
+          const err = await res.json();
+          showToast(err.error || 'Rate limit cooldown. Please wait.', 'error');
+          return;
+        }
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.error || 'Failed to send message');
+        }
+
+        input.value = '';
+        clearPendingImage();
+
+        if (activeChatType === 'global') {
+          await fetchGlobalFeed(true);
+        } else {
+          await fetchDmThread(activeRecipient, true);
+        }
+
+        fetchInbox();
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        sendBtn.disabled = false;
+        input.focus();
+      }
+    }
+
+    function manualRefreshChat() {
+      if (activeChatType === 'global') fetchGlobalFeed(true);
+      else if (activeRecipient) fetchDmThread(activeRecipient, true);
+    }
+
+    // --------------------------------------------------------
+    // MODALS & HELPERS
+    // --------------------------------------------------------
+    function openNewChatModal() {
+      document.getElementById('newChatModal').classList.remove('hidden');
+      document.getElementById('newChatUserInput').focus();
+    }
+    function closeNewChatModal() {
+      document.getElementById('newChatModal').classList.add('hidden');
+    }
+    function startChatFromModal() {
+      const recipient = document.getElementById('newChatUserInput').value.trim().toLowerCase();
+      if (recipient) {
+        closeNewChatModal();
+        selectConversation('dm', recipient);
+      }
+    }
+
+    function openMediaViewer(imgUrl, author, isEphemeral = false) {
+      if (ephemeralSnapTimer) clearTimeout(ephemeralSnapTimer);
+      document.getElementById('viewerImgTarget').src = imgUrl;
+      document.getElementById('viewerAuthorLabel').textContent = isEphemeral ? `@${author} · expires in 5s` : `@${author}`;
+      document.getElementById('mediaViewerModal').classList.remove('hidden');
+      if (isEphemeral) {
+        ephemeralSnapTimer = setTimeout(() => closeMediaViewer(), 5000);
+      }
+    }
+    function closeMediaViewer() {
+      if (ephemeralSnapTimer) clearTimeout(ephemeralSnapTimer);
+      ephemeralSnapTimer = null;
+      document.getElementById('viewerImgTarget').src = '';
+      document.getElementById('mediaViewerModal').classList.add('hidden');
+    }
+
+    function insertEmoji(em) {
+      const input = document.getElementById('chatInputText');
+      input.value += em;
+      input.focus();
+    }
+
+    let toastTimer = null;
+    function showToast(msg, type = 'info') {
+      const toast = document.getElementById('appToast');
+      document.getElementById('toastMessage').textContent = msg;
+      const iconWrap = document.getElementById('toastIconWrap');
+
+      if (type === 'error') {
+        iconWrap.className = 'w-6 h-6 rounded bg-[var(--danger-soft)] text-[var(--danger)] flex items-center justify-center shrink-0';
+      } else {
+        iconWrap.className = 'w-6 h-6 rounded bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center shrink-0';
+      }
+
+      toast.classList.remove('hidden');
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.add('hidden'), 3000);
+    }
+
+    function formatRelative(ts) {
+      const diff = Math.floor((Date.now() - ts) / 1000);
+      if (diff < 60) return 'now';
+      if (diff < 3600) return `${Math.floor(diff / 60)}m`;
+      if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
+      return `${Math.floor(diff / 86400)}d`;
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+  </script>
+</body>
+</html>
